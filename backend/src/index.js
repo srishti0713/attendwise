@@ -1,4 +1,4 @@
-import "./env/env.js"
+import "./env/env.js";
 import app from "./app.js";
 import connectDB from "./lib/db.js";
 
