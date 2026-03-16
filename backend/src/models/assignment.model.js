@@ -1,26 +1,26 @@
 import mongoose from "mongoose";
 
-const assignmentSchema= new mongoose({
-    subjectId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Subject",
-        required:true
+const assignmentSchema = new mongoose({
+    subjectId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subject",
+        required: true,
     },
-    title:{
-        type:String,
-        required:true
+    title: {
+        type: String,
+        required: true,
     },
-    description:{
-        type:String
+    description: {
+        type: String,
     },
-    dueDate:{
-        type:String,
-        required:true
+    dueDate: {
+        type: String,
+        required: true,
     },
-    reminderSent:{
-        type:Boolean,
-        default:false
-    }
-})
+    reminderSent: {
+        type: Boolean,
+        default: false,
+    },
+});
 
-export const Assignment = mongoose.model("Assignment",assignmentSchema)
+export const Assignment = mongoose.model("Assignment", assignmentSchema);
