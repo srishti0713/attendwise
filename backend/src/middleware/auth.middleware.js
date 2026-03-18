@@ -3,22 +3,31 @@ import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
 const verifyJWT = async (req, res, next) => {
-    const token =
-        req.cookies?.jwt || req.header("Authorization")?.replace("Bearer ", "");
+    try {
+        const token = req.cookies?.jwt;
 
-    if (!token) {
-        throw new throwError(401, "Unauthorized Request");
+        if (!token) {
+            return res.status(400).json({ message: "Unauthorized access" });
+        }
+
+        const decodedToken = jwt.verify(token, process.env.JWT_TOKEN_SECRET);
+
+        if (!decodedToken) {
+            return res.status(400).json({ message: "Unauthorized access" });
+        }
+
+        const user = await User.findById(decodedToken?.userId).select(
+            "-password",
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        return res.status(400).json({ message: "Invalid or expired token" });
     }
-
-    const decodedToken = jwt.verify(token, process.env.JWT_TOKEN_SECRET);
-
-    const user = await User.findById(decodedToken?.userId).select("-password");
-
-    if (!user) {
-        throw new throwError(401, "Invalid Token");
-    }
-
-    req.user = user;
-    next();
 };
 export { verifyJWT };

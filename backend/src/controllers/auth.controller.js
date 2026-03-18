@@ -13,27 +13,25 @@ const registerUser = async (req, res) => {
     try {
         let { name, email, password } = req.body;
 
-        // Sanitization
+        //Sanitization
         name = name?.trim();
         email = email?.trim().toLowerCase();
 
         //Field Validation
+        //Name
         if (!name) {
             return res.status(400).json({ message: "Name is required" });
         }
+
+        //Email
         if (!email) {
             return res.status(400).json({ message: "Email is required" });
         }
-        if (!password) {
-            return res.status(400).json({ message: "Password is required" });
-        }
 
         if (email.length > MAX_EMAIL_LENGTH) {
-            return res
-                .status(400)
-                .json({
-                    message: `Email cannot exceed length ${MAX_EMAIL_LENGTH}`,
-                });
+            return res.status(400).json({
+                message: `Email cannot exceed ${MAX_EMAIL_LENGTH} characters.`,
+            });
         }
 
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -41,49 +39,43 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "Invalid Email" });
         }
 
+        //Password
+        if (!password) {
+            return res.status(400).json({ message: "Password is required" });
+        }
+
         if (
             password.length < MIN_PASSWORD_LENGTH ||
             password.length > MAX_PASSWORD_LENGTH
         ) {
-            return res
-                .status(400)
-                .json({
-                    message: `Password should be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH}`,
-                });
+            return res.status(400).json({
+                message: `Length of password should be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH}`,
+            });
         }
 
-        //check for existing user
+        //Check for existing user
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
         }
 
-        //hash password
+        //Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create new user
+        //Create new user
         const newUser = await User.create({
             name,
             email,
             password: hashedPassword,
         });
 
-        generateTokenAndSetCookie(newUser._id, res);
+        generateTokenAndSetCookie(newUser?._id, res);
 
-        if (!newUser) {
-            return res
-                .status(400)
-                .json({ message: "Failed to create new user" });
-        }
-
-        const createdUser = await User.findById(newUser._id).select(
-            "-password",
-        );
-
-        return res.status(201).json({ createdUser });
+        return res
+            .status(201)
+            .json({ name: newUser.name, email: newUser.email });
     } catch (error) {
-        console.log("ERROR :: CONTROLLER :: register ::", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        return throwError(res, error, "register");
     }
 };
 
@@ -93,15 +85,23 @@ const loginUser = async (req, res) => {
         email = email?.trim().toLowerCase();
 
         //Field validation
+        //Email
         if (!email) {
             return res.status(400).json({ message: "Email is required" });
         }
 
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ message: "Invalid Email" });
+        if (email.length > MAX_EMAIL_LENGTH) {
+            return res.status(400).json({
+                message: `Email cannot exceed ${MAX_EMAIL_LENGTH} characters.`,
+            });
         }
 
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: "Invalid email" });
+        }
+
+        //Password
         if (!password) {
             return res.status(400).json({ message: "Password is required" });
         }
@@ -110,11 +110,15 @@ const loginUser = async (req, res) => {
             password.length < MIN_PASSWORD_LENGTH ||
             password.length > MAX_PASSWORD_LENGTH
         ) {
-            return res
-                .status(400)
-                .json({
-                    message: `Password should be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH}`,
-                });
+            return res.status(400).json({
+                message: `Password should be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH}`,
+            });
+        }
+
+        //Password check
+        const validPassword = await bcrypt.compare(password, user?.password);
+        if (!validPassword) {
+            return res.status(400).json({ message: "Incorrect password" });
         }
 
         //Find user
@@ -123,26 +127,17 @@ const loginUser = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        //Password check
-        const validPassword = await bcrypt.compare(password, user?.password);
-        if (!validPassword) {
-            return res.status(400).json({ message: "Incorrect Password" });
-        }
-
         generateTokenAndSetCookie(user._id, res);
 
-        const foundUser = await User.findById(user._id).select("-password");
-
-        return res.status(200).json({ foundUser });
+        return res.status(200).json({ name: user.name, email: user.email });
     } catch (error) {
-        console.log("ERROR :: CONTROLLER :: login ::", error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
+        return throwError(res, error, "login");
     }
 };
 
 const logoutUser = async (req, res) => {
     try {
-        //site options
+        //Site options
         const options = {
             httpOnly: true,
             sameSite: "none",
@@ -152,24 +147,20 @@ const logoutUser = async (req, res) => {
         return res
             .status(200)
             .clearCookie("jwt", options)
-            .json({ message: "User Logged Out Successfully" });
+            .json({ message: "User logged out successfully" });
     } catch (error) {
-        console.log("ERROR :: CONTROLLER :: logout ::", error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
+        return throwError(res, error, "logout");
     }
 };
 
 const currentUser = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).select("-password");
+        const user = await User.findById(req.user?._id).select("-password");
         if (!user) return res.status(404).json({ message: "User not found" });
 
         return res.status(200).json(user);
     } catch (error) {
-        console.log("ERROR :: CONTROLLER :: currentUser ::", error.message);
-        return res.status(500).json({
-            message: "Internal Server Error",
-        });
+        return throwError(res, error, "currentUser");
     }
 };
 
