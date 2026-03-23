@@ -60,7 +60,8 @@ const registerUser = async (req, res) => {
         }
 
         //Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         //Create new user
         const newUser = await User.create({
@@ -115,16 +116,16 @@ const loginUser = async (req, res) => {
             });
         }
 
-        //Password check
-        const validPassword = await bcrypt.compare(password, user?.password);
-        if (!validPassword) {
-            return res.status(400).json({ message: "Incorrect password" });
-        }
-
         //Find user
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
+        }
+
+        //Password check
+        const validPassword = await bcrypt.compare(password, user?.password);
+        if (!validPassword) {
+            return res.status(400).json({ message: "Incorrect password" });
         }
 
         generateTokenAndSetCookie(user._id, res);
