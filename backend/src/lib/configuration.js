@@ -1,5 +1,5 @@
 //App
-export const FOLDER_NAME = "Attendwise";
+export const APP_NAME = "Attendwise";
 
 //User
 export const MIN_PASSWORD_LENGTH = 8;

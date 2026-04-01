@@ -1,6 +1,13 @@
-import mongoose from "mongoose";
+import mongoose, {Schema} from "mongoose";
 
-const assignmentSchema = new mongoose({
+const assignmentSchema = new Schema(
+    {
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true,
+    },
     subjectId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Subject",
@@ -12,15 +19,22 @@ const assignmentSchema = new mongoose({
     },
     description: {
         type: String,
+        trim: true,
     },
     dueDate: {
-        type: String,
+        type: Date,
         required: true,
     },
     reminderSent: {
         type: Boolean,
         default: false,
     },
-});
+    status: {
+        type: String,
+        enum: ["pending", "completed"],
+        default: "pending",
+    }
+},{timestamps: true});
 
-export const Assignment = mongoose.model("Assignment", assignmentSchema);
+const Assignment = mongoose.model("Assignment", assignmentSchema);
+export default Assignment;

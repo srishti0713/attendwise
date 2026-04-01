@@ -5,8 +5,9 @@ import { throwError } from "../lib/api.error.js";
 import {
     MAX_PASSWORD_LENGTH,
     MIN_PASSWORD_LENGTH,
-    FOLDER_NAME,
     MAX_EMAIL_LENGTH,
+    MIN_NAME_LENGTH,
+    MAX_NAME_LENGTH,
 } from "../lib/configuration.js";
 
 const registerUser = async (req, res) => {
@@ -21,6 +22,10 @@ const registerUser = async (req, res) => {
         //Name
         if (!name) {
             return res.status(400).json({ message: "Name is required" });
+        }
+
+        if (name.length < MIN_NAME_LENGTH || name.length > MAX_NAME_LENGTH) {
+            return res.status(400).json({message: `Length of name should be between ${MIN_NAME_LENGTH} and ${MAX_NAME_LENGTH}`});
         }
 
         //Email

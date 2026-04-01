@@ -1,31 +1,55 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const subjectSchema = new mongoose({
-    semesterId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Semester",
-        required: true,
+const subjectSchema = new Schema(
+    {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+            index: true,
+        },
+        semesterId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Semester",
+            required: true,
+        },
+        subjectName: {
+            type: String,
+            required: true,
+        },
+        totalClasses: {
+            type: Number,
+            default: 0,
+        },
+        attendedClasses: {
+            type: Number,
+            default: 0,
+        },
     },
-    subjectName: {
-        type: String,
-        required: true,
-    },
-    totalClasses: {
-        type: Number,
-        default: 0,
-    },
-    attendedClasses: {
-        type: Number,
-        default: 0,
-    },
-    attendancePercentage: {
-        type: Number,
-        default: 0,
-    },
-    zone: {
-        type: String,
-        enum: ["safe", "moderate", "danger"],
-    },
+    { timestamps: true },
+);
+
+// Virtual: attendance %
+subjectSchema.virtual("attendancePercentage").get(function () {
+    if (this.totalClasses === 0) return 0;
+    return (this.attendedClasses / this.totalClasses) * 100;
 });
 
-export const Subject = mongoose.model("Subject", subjectSchema);
+// Virtual: zone
+subjectSchema.virtual("zone").get(function () {
+    const percentage =
+        this.totalClasses === 0
+            ? 0
+            : (this.attendedClasses / this.totalClasses) * 100;
+
+    if (percentage >= 75) return "safe";
+    if (percentage >= 50) return "moderate";
+    return "danger";
+});
+
+// Include virtuals
+subjectSchema.set("toJSON", { virtuals: true });
+subjectSchema.set("toObject", { virtuals: true });
+
+const Subject = mongoose.model("Subject", subjectSchema);
+export default Subject;

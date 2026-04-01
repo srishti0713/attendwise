@@ -1,23 +1,28 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const semesterSchema = new mongoose.Schema(
+const semesterSchema = new Schema(
     {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true,
         },
         semesterName: {
             type: String,
             required: true,
+            trim: true,
         },
-        subjects: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Subject",
-            required: true,
-        },
+        subjects: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Subject",
+            },
+        ],
     },
     { timestamps: true },
 );
 
-export const Semester = mongoose.model("Semester", semesterSchema);
+
+const Semester = mongoose.model("Semester", semesterSchema);
+export default Semester;

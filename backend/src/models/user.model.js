@@ -21,6 +21,18 @@ const userSchema = new Schema(
                 ref: "Semester",
             },
         ],
+        safePercentage: {
+            type: Number,
+            default: 60,
+            min: 1,
+            max: 100,
+        },
+        targetPercentage: {
+            type: Number,
+            default: 75,
+            min: 1,
+            max: 100,
+        },
     },
     { timestamps: true },
 );
