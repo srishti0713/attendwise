@@ -3,6 +3,9 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import subjectRoutes from "./routes/subject.routes.js";
+import semesterRoutes from "./routes/semester.routes.js";
+import timetableRoutes from "./routes/timetable.routes.js";
 
 const app = express();
 
@@ -23,5 +26,6 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("api/v1/subjects", subjectRoutes);
 app.use("/api/v1/semesters", semesterRoutes);
+app.use("/api/v1/timetable", timetableRoutes);
 
 export default app;
