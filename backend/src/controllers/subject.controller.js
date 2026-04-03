@@ -2,8 +2,11 @@ import Subject from "../models/subject.model.js";
 import User from "../models/user.model.js";
 import Semester from "../models/semester.model.js";
 import { throwError } from "../lib/api.error.js";
-import { classesNeeded } from "../utils/attendance.util.js";
 import { MAX_TITLE_LENGTH, MIN_TITLE_LENGTH } from "../lib/configuration.js";
+import mongoose from "mongoose";
+import { getAttendanceStats } from "../utils/attendance.util.js";
+import Timetable from "../models/timetable.model.js";
+import Assignment from "../models/assignment.model.js";
 import mongoose from "mongoose";
 
 export const getSubjects = async (req, res) => {
@@ -15,14 +18,15 @@ export const getSubjects = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(semesterId))
             return res.status(400).json({ message: "Invalid semester ID" });
 
+        // Find user
         const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ message: "User not found" });
 
+        // Find semester
         const semester = await Semester.findOne({
             _id: semesterId,
             userId,
         })
-            .populate("subjects", "subjectName totalClasses attendedClasses")
+            .populate("subjects", "subjectName attendance")
             .lean();
 
         if (!semester)
@@ -30,37 +34,15 @@ export const getSubjects = async (req, res) => {
 
         // Attendance details calculation
         const result = semester.subjects.map((subject) => {
-            const attended = subject.attendedClasses;
-            const total = subject.totalClasses;
-
-            const current = total === 0 ? 0 : (attended / total) * 100;
-
-            const min = user.safePercentage;
-            const max = user.targetPercentage;
-
-            const safeNeeded = classesNeeded(attended, total, min);
-            const goalNeeded = classesNeeded(attended, total, max);
-
-            let status, message;
-
-            if (current < min) {
-                status = "danger";
-                message = `Attend ${safeNeeded} classes to reach ${min}%`;
-            } else if (current < max) {
-                status = "moderate";
-                message = `Safe. Attend ${goalNeeded} more to reach ${max}%`;
-            } else {
-                status = "safe";
-                message = `Above ${max}%`;
-            }
+            const stats = getAttendanceStats(
+                subject.attendance,
+                user.safePercentage,
+                user.targetPercentage,
+            );
 
             return {
                 ...subject,
-                attendancePercentage: Number(current.toFixed(2)),
-                classesToSafeZone: safeNeeded,
-                classesToGoal: goalNeeded,
-                status,
-                message,
+                ...stats,
             };
         });
 
@@ -79,9 +61,11 @@ export const getSubject = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(subjectId))
             return res.status(400).json({ message: "Invalid subject ID" });
 
+        // Find user
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: "User not found" });
 
+        // Find subject
         const subject = await Subject.findOne({
             _id: subjectId,
             userId,
@@ -89,37 +73,16 @@ export const getSubject = async (req, res) => {
         if (!subject)
             return (res.status(404), json({ message: "Subject not found" }));
 
-        const attended = subject.attendedClasses;
-        const total = subject.totalClasses;
-
-        const current = total === 0 ? 0 : (attended / total) * 100;
-
-        const min = user.safePercentage;
-        const max = user.targetPercentage;
-
-        const safeNeeded = classesNeeded(attended, total, min);
-        const goalNeeded = classesNeeded(attended, total, max);
-
-        let status, message;
-
-        if (current < min) {
-            status = "danger";
-            message = `Attend ${safeNeeded} classes to reach ${min}%`;
-        } else if (current < max) {
-            status = "moderate";
-            message = `Safe. Attend ${goalNeeded} more to reach ${max}%`;
-        } else {
-            status = "safe";
-            message = `Above ${max}%`;
-        }
+        // Return with stats
+        const stats = getAttendanceStats(
+            subject.attendance,
+            user.safePercentage,
+            user.targetPercentage,
+        );
 
         return res.status(200).json({
             ...subject,
-            attendancePercentage: Number(current.toFixed(2)),
-            classesToSafeZone: safeNeeded,
-            classesToGoal: goalNeeded,
-            status,
-            message,
+            ...stats,
         });
     } catch (error) {
         return throwError(res, error, "getSubject");
@@ -174,12 +137,12 @@ export const addSubject = async (req, res) => {
         if (attendedClasses !== undefined) {
             attendedClasses = Number(attendedClasses);
 
-            if ( attendedClasses < 0|| isNaN(attendedClasses))
+            if (attendedClasses < 0 || isNaN(attendedClasses))
                 return res
                     .status(400)
                     .json({ message: "Invalid number of total classes" });
 
-           if (totalClasses !== undefined && attendedClasses > totalClasses)
+            if (totalClasses !== undefined && attendedClasses > totalClasses)
                 return res.status(400).json({
                     message:
                         "Number of classes attended cannot be more than total classes",
@@ -206,4 +169,184 @@ export const addSubject = async (req, res) => {
     }
 };
 
-export const updateSubject = (req, res) => {};
+export const updateSubject = async (req, res) => {
+    try {
+        const { subjectId } = req.params;
+        let { subjectName, date, status } = req.body;
+
+        // Validate subject ID
+        if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+            return res.status(400).json({ message: "Invalid subject ID" });
+        }
+
+        const subject = await Subject.findOne({
+            _id: subjectId,
+            userId: req.user._id,
+        });
+
+        if (!subject) {
+            return res.status(404).json({ message: "Subject not found" });
+        }
+
+        // Update subject name
+
+        if (subjectName !== undefined) {
+            subjectName = subjectName.trim();
+
+            if (!subjectName) {
+                return res
+                    .status(400)
+                    .json({ message: "Subject name cannot be empty" });
+            }
+
+            if (
+                subjectName.length < MIN_TITLE_LENGTH ||
+                subjectName.length > MAX_TITLE_LENGTH
+            ) {
+                return res.status(400).json({
+                    message: `Subject name must be between ${MIN_TITLE_LENGTH} and ${MAX_TITLE_LENGTH} characters`,
+                });
+            }
+
+            subject.subjectName = subjectName;
+        }
+
+        // Update attendance
+
+        if ((date && !status) || (!date && status)) {
+            return res.status(400).json({
+                message: "Both date and status are required",
+            });
+        }
+        if (date !== undefined && status !== undefined) {
+            const validStatuses = ["attended", "missed", "off"];
+
+            if (!validStatuses.includes(status)) {
+                return res.status(400).json({
+                    message: "Invalid status value",
+                });
+            }
+
+            const parsedDate = new Date(date);
+
+            if (isNaN(parsedDate)) {
+                return res.status(400).json({
+                    message: "Invalid date format",
+                });
+            }
+
+            // Normalize date (avoid time issues)
+            const normalizedDate = new Date(
+                parsedDate.getFullYear(),
+                parsedDate.getMonth(),
+                parsedDate.getDate(),
+            );
+
+            const existingEntry = subject.attendance.find(
+                (entry) =>
+                    new Date(entry.date).toDateString() ===
+                    normalizedDate.toDateString(),
+            );
+
+            if (existingEntry) {
+                // Update existing record
+                existingEntry.status = status;
+            } else {
+                // Add new record
+                subject.attendance.push({
+                    date: normalizedDate,
+                    status,
+                });
+            }
+        }
+
+        await subject.save();
+
+        // Return with stats
+
+        const user = await User.findById(req.user._id);
+
+        const stats = getAttendanceStats(
+            subject.attendance,
+            user.safePercentage,
+            user.targetPercentage,
+        );
+
+        return res.status(200).json({
+            ...subject.toObject(),
+            ...stats,
+        });
+    } catch (error) {
+        return throwError(res, error, "updateSubject");
+    }
+};
+
+export const deleteSubject = async (req, res) => {
+    const session = await mongoose.startSession();
+
+    try {
+        session.startTransaction();
+
+        const { subjectId } = req.params;
+
+        // Validate subject ID
+        if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+            await session.abortTransaction();
+            return res.status(400).json({ message: "Invalid subject ID" });
+        }
+
+        // Find subject
+        const subject = await Subject.findOne({
+            _id: subjectId,
+            userId: req.user._id,
+        }).session(session);
+
+        if (!subject) {
+            await session.abortTransaction();
+            return res.status(404).json({ message: "Subject not found" });
+        }
+
+        // Remove from semester
+        await Semester.findOneAndUpdate(
+            { _id: subject.semesterId, userId: req.user._id },
+            { $pull: { subjects: subjectId } },
+            { session },
+        );
+
+        // Remove from timetable
+        await Timetable.updateMany(
+            { semesterId: subject.semesterId },
+            {
+                $pull: {
+                    "timetable.Monday": subjectId,
+                    "timetable.Tuesday": subjectId,
+                    "timetable.Wednesday": subjectId,
+                    "timetable.Thursday": subjectId,
+                    "timetable.Friday": subjectId,
+                    "timetable.Saturday": subjectId,
+                },
+            },
+            { session },
+        );
+
+        // Remove assignments
+        await Assignment.deleteMany(
+            { subjectId, userId: req.user._id },
+            { session },
+        );
+
+        // Delete subject
+        await subject.deleteOne({ session });
+
+        await session.commitTransaction();
+
+        return res.status(200).json({
+            message: "Subject deleted successfully",
+        });
+    } catch (error) {
+        await session.abortTransaction();
+        return throwError(res, error, "deleteSubject");
+    } finally {
+        session.endSession();
+    }
+};
