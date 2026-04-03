@@ -1,4 +1,4 @@
-function classesNeeded(attended, total, target) {
+export function classesNeeded(attended, total, target) {
     if (total === 0) return 0;
 
     const P = target / 100;
