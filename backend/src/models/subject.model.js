@@ -17,6 +17,23 @@ const subjectSchema = new Schema(
             type: String,
             required: true,
         },
+        attendance: {
+            type: [
+                {
+                    date: {
+                        type: Date,
+                        required: true,
+                    },
+                    status: {
+                        type: String,
+                        enum: ["attended", "missed", "off"],
+                        required: true,
+                    },
+                },
+            ],
+            default: [],
+        },
+
         totalClasses: {
             type: Number,
             default: 0,
