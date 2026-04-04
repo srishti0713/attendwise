@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import { getAttendanceStats } from "../utils/attendance.util.js";
 import Timetable from "../models/timetable.model.js";
 import Assignment from "../models/assignment.model.js";
-import mongoose from "mongoose";
+
 
 export const getSubjects = async (req, res) => {
     try {
@@ -140,7 +140,7 @@ export const addSubject = async (req, res) => {
             if (attendedClasses < 0 || isNaN(attendedClasses))
                 return res
                     .status(400)
-                    .json({ message: "Invalid number of total classes" });
+                    .json({ message: "Invalid number of attended classes" });
 
             if (totalClasses !== undefined && attendedClasses > totalClasses)
                 return res.status(400).json({

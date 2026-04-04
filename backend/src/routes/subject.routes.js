@@ -4,7 +4,7 @@ import {
     getSubject,
     getSubjects,
     deleteSubject,
-} from "../controllers/subject.controller";
+} from "../controllers/subject.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import express from "express";
 
@@ -14,8 +14,8 @@ const router = express.Router();
 router.post("/:semesterId", verifyJWT, addSubject);
 
 // GET
+router.get("/get-subject/:subjectId", verifyJWT, getSubject);
 router.get("/:semesterId", verifyJWT, getSubjects);
-router.get("/:subjectId", verifyJWT, getSubject);
 
 // PATCH
 router.patch("/:subjectId", verifyJWT, updateSubject);
