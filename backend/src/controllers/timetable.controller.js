@@ -46,8 +46,13 @@ export const postTimetable = async (req, res) => {
         // Collect all subjectIds (flatten)
         const allSubjectIds = Object.values(normalizedTimetable).flat();
 
+        // Remove duplicates
+        const uniqueSubjectIds = [
+            ...new Set(allSubjectIds.map((id) => id.toString())),
+        ];
+
         // Validate all subject IDs
-        for (const id of allSubjectIds) {
+        for (const id of uniqueSubjectIds) {
             if (!mongoose.Types.ObjectId.isValid(id)) {
                 return res.status(400).json({
                     message: "Invalid subject ID in timetable",
@@ -57,17 +62,16 @@ export const postTimetable = async (req, res) => {
 
         // Check ownership of subjects
         const validSubjects = await Subject.find({
-            _id: { $in: allSubjectIds },
+            _id: { $in: uniqueSubjectIds },
             semesterId,
             userId,
         }).select("_id");
 
-        if (validSubjects.length !== allSubjectIds.length) {
+        if (validSubjects.length !== uniqueSubjectIds.length) {
             return res.status(400).json({
                 message: "Some subjects are invalid or do not belong to user",
             });
         }
-
         // Create or Update timetable (UPSERT)
         const savedTimetable = await Timetable.findOneAndUpdate(
             { semesterId },
@@ -123,9 +127,11 @@ export const getTimetable = async (req, res) => {
 
 export const editTimetable = async (req, res) => {
     try {
+         console.log("BODY : ", req.body)
         const { semesterId } = req.params;
         const { timetable, day, subjects } = req.body;
         const userId = req.user._id;
+       
 
         const days = [
             "Monday",
@@ -186,24 +192,30 @@ export const editTimetable = async (req, res) => {
         // Validate all subject IDs (flatten)
         const allSubjectIds = Object.values(updatedTimetable).flat();
 
-        for (const id of allSubjectIds) {
+        // Remove duplicates
+        const uniqueSubjectIds = [
+            ...new Set(allSubjectIds.map((id) => id.toString())),
+        ];
+
+        // Validate all subject IDs
+        for (const id of uniqueSubjectIds) {
             if (!mongoose.Types.ObjectId.isValid(id)) {
                 return res.status(400).json({
-                    message: "Invalid subject ID",
+                    message: "Invalid subject ID in timetable",
                 });
             }
         }
 
-        // Validate ownership
+        // Check ownership of subjects
         const validSubjects = await Subject.find({
-            _id: { $in: allSubjectIds },
+            _id: { $in: uniqueSubjectIds },
             semesterId,
             userId,
         }).select("_id");
 
-        if (validSubjects.length !== allSubjectIds.length) {
+        if (validSubjects.length !== uniqueSubjectIds.length) {
             return res.status(400).json({
-                message: "Invalid subjects in timetable",
+                message: "Some subjects are invalid or do not belong to user",
             });
         }
 
@@ -211,7 +223,7 @@ export const editTimetable = async (req, res) => {
         const updated = await Timetable.findOneAndUpdate(
             { semesterId },
             { timetable: updatedTimetable },
-            { new: true },
+            { returnDocument: "after" },
         )
             .populate("timetable.Monday", "subjectName")
             .populate("timetable.Tuesday", "subjectName")
