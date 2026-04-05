@@ -19,7 +19,7 @@ const Card = ({ subject, percentage }) => {
             <div className="flex flex-col gap-3">
                 {/* Row: Add Assignment + Buttons */}
                 <div className="flex flex-col sm:flex-row gap-2">
-                    <Button className="btn-sm flex-1" variant="outline">
+                    <Button className="btn-sm flex-1" variant="ghost">
                         + Add Assignment
                     </Button>
 
@@ -27,10 +27,16 @@ const Card = ({ subject, percentage }) => {
                         <Button className="btn-xs btn-circle" variant="neutral">
                             <Ban />
                         </Button>
-                        <Button className="btn-xs btn-circle" variant="success">
+                        <Button
+                            className="btn-xs btn-circle text-green-700"
+                            variant="success"
+                        >
                             <Check />
                         </Button>
-                        <Button className="btn-xs btn-circle" variant="error">
+                        <Button
+                            className="btn-xs btn-circle text-red-700"
+                            variant="error"
+                        >
                             <X />
                         </Button>
                     </div>

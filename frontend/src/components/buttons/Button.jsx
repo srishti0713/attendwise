@@ -6,13 +6,13 @@ const Button = ({
     variant = "",
     outline = false,
     fullWidth = false,
-    onClick,
     className = "",
+    onClick,
 }) => {
     return (
         <button
             onClick={onClick}
-            className={`btn ${outline ? "btn-outline" : `btn-${variant}`} ${fullWidth ? "w-full" : ""}`}
+            className={`btn ${className} ${outline ? "btn-outline" : `btn-${variant}`} ${fullWidth ? "w-full" : ""}`}
         >
             {children || label}
         </button>
