@@ -1,7 +1,13 @@
+import Header from "../components/header/Header";
+import Footer from "../components/footer/Footer";
 const MainLayout = ({ children }) => {
     return (
-        <div>
-            <main className="pt-16 px-6">{children}</main>
+        <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="pt-16 px-6 bg-linear-to-br from-blue-200 via-indigo-200 to-purple-200 flex-1">
+                {children}
+            </main>
+            <Footer />
         </div>
     );
 };
