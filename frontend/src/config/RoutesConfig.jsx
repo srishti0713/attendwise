@@ -1,5 +1,6 @@
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
+import SubjectsDisplay from "../pages/subjects/SubjectsDisplay";
 
 export const routes = [
     {
@@ -13,5 +14,11 @@ export const routes = [
         element: <Login />,
         protected: false,
         publicOnly: true,
+    },
+    {
+        path: "/subjects",
+        element: <SubjectsDisplay />,
+        protected: true,
+        publicOnly: false,
     },
 ];

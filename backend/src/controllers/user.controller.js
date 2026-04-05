@@ -230,7 +230,7 @@ export const deleteUser = async (req, res) => {
         res.clearCookie("jwt", {
             httpOnly: true,
             sameSite: "none",
-            secure: true,
+            secure: false,
         });
         return res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {

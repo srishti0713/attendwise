@@ -1,14 +1,23 @@
-import {addSemester, getSemester, deleteSemester, editSemester} from "../controllers/semester.controller.js";
+import {
+    addSemester,
+    getSemester,
+    getSemesters,
+    deleteSemester,
+    editSemester,
+} from "../controllers/semester.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
+import { upload } from "../middleware/multer.middleware.js";
 import express from "express";
 
 const router = express.Router();
 
 // POST
-router.post("/create-semester", verifyJWT, addSemester);
+router.post("/create-semester", upload.single(), verifyJWT, addSemester);
 
 // GET
+router.get("/get-semesters", verifyJWT, getSemesters);
 router.get("/:semesterId", verifyJWT, getSemester);
+
 
 // PATCH
 router.patch("/:semesterId", verifyJWT, editSemester);

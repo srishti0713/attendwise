@@ -8,7 +8,6 @@ import { getAttendanceStats } from "../utils/attendance.util.js";
 import Timetable from "../models/timetable.model.js";
 import Assignment from "../models/assignment.model.js";
 
-
 export const getSubjects = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -71,7 +70,7 @@ export const getSubject = async (req, res) => {
             userId,
         }).lean();
         if (!subject)
-            return (res.status(404), json({ message: "Subject not found" }));
+            return res.status(404).json({ message: "Subject not found" });
 
         // Return with stats
         const stats = getAttendanceStats(

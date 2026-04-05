@@ -82,6 +82,22 @@ export const getSemester = async (req, res) => {
     }
 };
 
+export const getSemesters = async (req, res) => {
+    console.log("REQ.USER:", req.user);
+
+
+
+    try {
+        const userId = req.user._id;
+        
+        const semesters = await Semester.find({ userId }).lean();
+
+        return res.status(200).json(semesters);
+    } catch (error) {
+        return throwError(res, error, "getSemesters");
+    }
+};
+
 export const deleteSemester = async (req, res) => {
     const session = await mongoose.startSession();
     try {
