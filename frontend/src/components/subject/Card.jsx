@@ -1,12 +1,14 @@
 import React from "react";
 import Button from "../buttons/Button.jsx";
 import { Check, X, Ban } from "lucide-react";
+import AttendanceCircle from "../subjects/AttendanceCircle.jsx";
 
-const Card = ({ subject, percentage }) => {
+const Card = ({ subject, percentage,status }) => {
     return (
         <div className="card bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-4 w-full max-w-sm mx-auto">
             {/* Top Section - Subject + Percentage */}
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex gap-4 items-center mb-3">
+                <AttendanceCircle percentage={percentage} status={status} />
                 <h2 className="text-lg font-semibold text-gray-800">
                     {subject}
                 </h2>
