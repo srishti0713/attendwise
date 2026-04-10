@@ -19,6 +19,10 @@ const semesterSchema = new Schema(
                 ref: "Subject",
             },
         ],
+        isCurrent: {
+            type: Boolean,
+            default: false,
+        }
     },
     { timestamps: true },
 );

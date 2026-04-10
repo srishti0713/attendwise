@@ -44,6 +44,11 @@ export const addSemester = async (req, res) => {
             semesterName,
         });
 
+        // unset previous
+        await Semester.updateMany({ userId: req.user._id }, { isCurrent: false });
+
+        semester.isCurrent = true;
+
         // Push semester in user's semesters
         await User.findByIdAndUpdate(req.user._id, {
             $push: { semesters: semester._id },
@@ -85,11 +90,9 @@ export const getSemester = async (req, res) => {
 export const getSemesters = async (req, res) => {
     console.log("REQ.USER:", req.user);
 
-
-
     try {
         const userId = req.user._id;
-        
+
         const semesters = await Semester.find({ userId }).lean();
 
         return res.status(200).json(semesters);
@@ -166,7 +169,7 @@ export const deleteSemester = async (req, res) => {
 export const editSemester = async (req, res) => {
     try {
         const { semesterId } = req.params;
-        let { semesterName } = req.body;
+        let { semesterName, isCurrent } = req.body;
 
         // Sanitization
         semesterName = semesterName?.trim();
@@ -197,6 +200,16 @@ export const editSemester = async (req, res) => {
         // Update semester
         semester.semesterName = semesterName;
 
+        if (isCurrent == true && !semester.isCurrent) {
+            // unset previous
+            await Semester.updateMany(
+                { userId: req.user._id },
+                { isCurrent: false },
+            );
+        }
+
+            semester.isCurrent = true;
+
         await semester.save();
 
         return res
@@ -204,5 +217,22 @@ export const editSemester = async (req, res) => {
             .json({ message: "Semester updated successfully" });
     } catch (error) {
         return throwError(res, error, "editSemester");
+    }
+};
+
+export const getCurrentSemester = async (req, res) => {
+    try {
+        const semester = await Semester.findOne({
+            userId: req.user._id,
+            isCurrent: true,
+        });
+
+        if (!semester) {
+            return res.status(404).json({ message: "No active semester" });
+        }
+
+        return res.status(200).json(semester);
+    } catch (error) {
+        return throwError(res, error, "getCurrentSemester");
     }
 };
