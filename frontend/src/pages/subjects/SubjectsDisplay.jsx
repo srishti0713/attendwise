@@ -54,7 +54,7 @@ const SubjectsDisplay = () => {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-black text-2xl font-bold">
-                    Subjects {semester?.name ? `- ${semester.name}` : ""}
+                    Subjects {semester?.semesterName ? `- ${semester.semesterName}` : ""}
                 </h1>
 
                 {/* Dropdown */}
@@ -66,7 +66,7 @@ const SubjectsDisplay = () => {
                     <option value="">Select Semester</option>
                     {semesters.map((sem) => (
                         <option key={sem._id} value={sem._id} className = "text-black">
-                            {sem.name || "Semester"}
+                            {sem.semesterName || "Semester"}
                         </option>
                     ))}
                 </select>

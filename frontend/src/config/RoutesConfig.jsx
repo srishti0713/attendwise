@@ -1,7 +1,7 @@
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import LandingPage from "../pages/core/LandingPage";
-import HomePage from "../pages/homePage/HomePage";
+import HomePage from "../pages/home/HomePage";
 import SubjectsDisplay from "../pages/subjects/SubjectsDisplay";
 
 export const routes = [

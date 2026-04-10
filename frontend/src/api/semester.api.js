@@ -24,3 +24,8 @@ export const deleteSemester = async (semesterId) => {
     const { data } = await api.delete(`/semesters/${semesterId}`);
     return data;
 }
+
+export const getCurrentSemester = async () => {
+    const { data } = await api.get(`/semesters/current`);
+    return data;
+}
