@@ -6,7 +6,7 @@ const useCurrentSemester = () => {
         queryKey: ["currentSemester"],
         queryFn: async () => {
             const res = await getCurrentSemester();
-            return res.data;
+            return res;
         },
         retry: false,
     });

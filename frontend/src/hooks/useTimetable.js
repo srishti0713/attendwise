@@ -8,7 +8,7 @@ const useTimetable = (semesterId) => {
         queryFn: async () => {
             try {
                 const timetable = await getTimetable(semesterId);
-                return timetable ?? null; 
+                return timetable ?? null;
             } catch (error) {
                 if (error.response?.status === 404) return null;
                 throw error;
@@ -16,9 +16,6 @@ const useTimetable = (semesterId) => {
         },
 
         enabled: !!semesterId,
-
-        retry: false,
-
         staleTime: 5 * 60 * 1000,
     });
 };

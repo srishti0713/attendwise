@@ -15,7 +15,7 @@ export const getAttendanceStats = (attendance = [], safe, target) => {
 
     const current = total === 0 ? 0 : (attended / total) * 100;
 
-    // ✅ Helper to calculate required classes
+    //  Helper to calculate required classes
     const classesNeeded = (att, tot, goal) => {
         if (tot === 0) return 0;
 
@@ -31,7 +31,7 @@ export const getAttendanceStats = (attendance = [], safe, target) => {
     const safeNeeded = classesNeeded(attended, total, safe);
     const targetNeeded = classesNeeded(attended, total, target);
 
-    // ✅ Status logic
+    //  Status logic
     let status, message;
 
     if (current < safe) {
