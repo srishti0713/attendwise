@@ -1,8 +1,10 @@
 import Timetable from "../models/timetable.model.js";
 import Semester from "../models/semester.model.js";
 import Subject from "../models/subject.model.js";
+import User from "../models/user.model.js";
 import mongoose from "mongoose";
 import { throwError } from "../lib/api.error.js";
+import { getAttendanceStats } from "../utils/attendance.util.js";
 
 export const postTimetable = async (req, res) => {
     try {
@@ -107,16 +109,48 @@ export const getTimetable = async (req, res) => {
 
         // Get timetable + populate subjects
         const timetable = await Timetable.findOne({ semesterId })
-            .populate("timetable.Monday", "subjectName")
-            .populate("timetable.Tuesday", "subjectName")
-            .populate("timetable.Wednesday", "subjectName")
-            .populate("timetable.Thursday", "subjectName")
-            .populate("timetable.Friday", "subjectName")
-            .populate("timetable.Saturday", "subjectName")
-            .lean();
+            .populate("timetable.Monday", "subjectName attendance")
+            .populate("timetable.Tuesday", "subjectName attendance")
+            .populate("timetable.Wednesday", "subjectName attendance")
+            .populate("timetable.Thursday", "subjectName attendance")
+            .populate("timetable.Friday", "subjectName attendance")
+            .populate("timetable.Saturday", "subjectName attendance")
+            .lean({ virtuals: true });
 
         if (!timetable) {
             return res.status(404).json({ message: "Timetable not found" });
+        }
+        
+
+        // GET USER (needed for safe & target %)
+        const user = await User.findById(userId);
+
+        // DAYS ARRAY
+        const days = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+        ];
+
+        // ✅ ADD STATS TO EACH SUBJECT
+        for (const day of days) {
+            timetable.timetable[day] = timetable.timetable[day].map(
+                (subject) => {
+                    const stats = getAttendanceStats(
+                        subject.attendance,
+                        user.safePercentage,
+                        user.targetPercentage,
+                    );
+
+                    return {
+                        ...subject,
+                        ...stats,
+                    };
+                },
+            );
         }
 
         return res.status(200).json(timetable);
