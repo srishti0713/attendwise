@@ -18,7 +18,7 @@ const completedAssignmentSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Subject",
             required: true,
-            index: true
+            index: true,
         },
         title: {
             type: String,
@@ -34,11 +34,14 @@ const completedAssignmentSchema = new Schema(
         },
         completedOn: {
             type: Date,
-            required: true
-        }
+            required: true,
+        },
     },
     { timestamps: true },
 );
 
-const CompletedAssignment = mongoose.model("CompletedAssignment", completedAssignmentSchema);
+const CompletedAssignment = mongoose.model(
+    "CompletedAssignment",
+    completedAssignmentSchema,
+);
 export default CompletedAssignment;

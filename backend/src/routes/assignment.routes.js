@@ -14,14 +14,30 @@ import express from "express";
 const router = express.Router();
 
 // POST
-router.post("/create-assignment/:subjectId", upload.single(), verifyJWT, addAssignment);
+router.post(
+    "/create-assignment/:subjectId",
+    upload.single(),
+    verifyJWT,
+    addAssignment,
+);
 
 // GET
 router.get("/get-assignment/:assignmentId", verifyJWT, getAssignment);
-router.get("/get-subjectAssignments/:subjectId", verifyJWT, getSubjectAssignments);
-router.get("/get-semesterAssignments/:semesterId", verifyJWT, getSemesterAssignments);
-router.get("/get-completedAssignments/:subjectId", verifyJWT, getCompletedAssignments);
-
+router.get(
+    "/get-subjectAssignments/:subjectId",
+    verifyJWT,
+    getSubjectAssignments,
+);
+router.get(
+    "/get-semesterAssignments/:semesterId",
+    verifyJWT,
+    getSemesterAssignments,
+);
+router.get(
+    "/get-completedAssignments/:subjectId",
+    verifyJWT,
+    getCompletedAssignments,
+);
 
 // PATCH
 router.patch("/edit-assignment/:assignmentId", verifyJWT, editAssignment);

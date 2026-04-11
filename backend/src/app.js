@@ -6,7 +6,7 @@ import userRoutes from "./routes/user.routes.js";
 import subjectRoutes from "./routes/subject.routes.js";
 import semesterRoutes from "./routes/semester.routes.js";
 import timetableRoutes from "./routes/timetable.routes.js";
-import assignmentRoutes from "./routes/assignment.routes.js"
+import assignmentRoutes from "./routes/assignment.routes.js";
 
 const app = express();
 
@@ -28,6 +28,6 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/subjects", subjectRoutes);
 app.use("/api/v1/semesters", semesterRoutes);
 app.use("/api/v1/timetable", timetableRoutes);
-app.use("/api/v1/assignments", assignmentRoutes)
+app.use("/api/v1/assignments", assignmentRoutes);
 
 export default app;

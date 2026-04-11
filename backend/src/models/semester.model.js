@@ -22,11 +22,10 @@ const semesterSchema = new Schema(
         isCurrent: {
             type: Boolean,
             default: false,
-        }
+        },
     },
     { timestamps: true },
 );
-
 
 const Semester = mongoose.model("Semester", semesterSchema);
 export default Semester;

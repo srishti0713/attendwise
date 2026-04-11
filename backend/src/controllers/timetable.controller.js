@@ -120,7 +120,6 @@ export const getTimetable = async (req, res) => {
         if (!timetable) {
             return res.status(404).json({ message: "Timetable not found" });
         }
-        
 
         // GET USER (needed for safe & target %)
         const user = await User.findById(userId);

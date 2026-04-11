@@ -25,7 +25,11 @@ const registerUser = async (req, res) => {
         }
 
         if (name.length < MIN_NAME_LENGTH || name.length > MAX_NAME_LENGTH) {
-            return res.status(400).json({message: `Length of name should be between ${MIN_NAME_LENGTH} and ${MAX_NAME_LENGTH}`});
+            return res
+                .status(400)
+                .json({
+                    message: `Length of name should be between ${MIN_NAME_LENGTH} and ${MAX_NAME_LENGTH}`,
+                });
         }
 
         //Email

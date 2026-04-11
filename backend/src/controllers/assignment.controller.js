@@ -112,7 +112,7 @@ export const getAssignment = async (req, res) => {
             return res.status(404).json({ message: "Assignment not found" });
         }
 
-        return res.status(200).json( assignment );
+        return res.status(200).json(assignment);
     } catch (error) {
         return throwError(res, error, "getAssignment");
     }

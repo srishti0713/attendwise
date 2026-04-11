@@ -1,7 +1,6 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const timetableSchema = new Schema(
-    {
+const timetableSchema = new Schema({
     semesterId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Semester",
