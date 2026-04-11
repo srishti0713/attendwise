@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import * as fs from "node:fs";
 
-export const extractTimetable = async (req,res) => {
+export const extractTimetable = async (req, res) => {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
     const base64ImageFile = fs.readFileSync("timetable.png", {

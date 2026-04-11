@@ -45,7 +45,10 @@ export const addSemester = async (req, res) => {
         });
 
         // unset previous
-        await Semester.updateMany({ userId: req.user._id }, { isCurrent: false });
+        await Semester.updateMany(
+            { userId: req.user._id },
+            { isCurrent: false },
+        );
 
         semester.isCurrent = true;
 
@@ -208,7 +211,7 @@ export const editSemester = async (req, res) => {
             );
         }
 
-            semester.isCurrent = true;
+        semester.isCurrent = true;
 
         await semester.save();
 

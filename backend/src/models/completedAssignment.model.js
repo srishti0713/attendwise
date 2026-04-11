@@ -1,7 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
-const assignmentSchema = new Schema(
+const completedAssignmentSchema = new Schema(
     {
+        assignmentId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Assignment",
+            required: true,
+            index: true,
+        },
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
@@ -12,6 +18,7 @@ const assignmentSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Subject",
             required: true,
+            index: true,
         },
         title: {
             type: String,
@@ -25,18 +32,16 @@ const assignmentSchema = new Schema(
             type: Date,
             required: true,
         },
-        reminderSent: {
-            type: Boolean,
-            default: false,
-        },
-        status: {
-            type: String,
-            enum: ["pending", "completed"],
-            default: "pending",
+        completedOn: {
+            type: Date,
+            required: true,
         },
     },
     { timestamps: true },
 );
 
-const Assignment = mongoose.model("Assignment", assignmentSchema);
-export default Assignment;
+const CompletedAssignment = mongoose.model(
+    "CompletedAssignment",
+    completedAssignmentSchema,
+);
+export default CompletedAssignment;

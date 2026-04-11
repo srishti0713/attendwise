@@ -9,3 +9,5 @@ export const MAX_NAME_LENGTH = 100;
 export const MAX_EMAIL_LENGTH = 254;
 export const MIN_TITLE_LENGTH = 1;
 export const MAX_TITLE_LENGTH = 50;
+export const MIN_DESCRIPTION_LENGTH = 2;
+export const MAX_DESCRIPTION_LENGTH = 500;
