@@ -127,11 +127,9 @@ export const getTimetable = async (req, res) => {
 
 export const editTimetable = async (req, res) => {
     try {
-         console.log("BODY : ", req.body)
         const { semesterId } = req.params;
         const { timetable, day, subjects } = req.body;
         const userId = req.user._id;
-       
 
         const days = [
             "Monday",
@@ -163,14 +161,16 @@ export const editTimetable = async (req, res) => {
             return res.status(404).json({ message: "Timetable not found" });
         }
 
-        let updatedTimetable = { ...existing.timetable };
+        let updatedTimetable = JSON.parse(JSON.stringify(existing.timetable));
 
-        // Full update (OCR)
+        // Full update (safe partial update)
         if (timetable) {
             for (const d of days) {
-                updatedTimetable[d] = Array.isArray(timetable[d])
-                    ? timetable[d]
-                    : [];
+                if (timetable[d] !== undefined) {
+                    updatedTimetable[d] = Array.isArray(timetable[d])
+                        ? timetable[d]
+                        : [];
+                }
             }
         }
 
