@@ -25,11 +25,9 @@ const registerUser = async (req, res) => {
         }
 
         if (name.length < MIN_NAME_LENGTH || name.length > MAX_NAME_LENGTH) {
-            return res
-                .status(400)
-                .json({
-                    message: `Length of name should be between ${MIN_NAME_LENGTH} and ${MAX_NAME_LENGTH}`,
-                });
+            return res.status(400).json({
+                message: `Length of name should be between ${MIN_NAME_LENGTH} and ${MAX_NAME_LENGTH}`,
+            });
         }
 
         //Email
@@ -147,11 +145,12 @@ const loginUser = async (req, res) => {
 
 const logoutUser = async (req, res) => {
     try {
+        const isProduction = process.env.NODE_ENV === "production"; 
         //Site options
         const options = {
             httpOnly: true,
-            sameSite: "none",
-            secure: false,
+            sameSite: isProduction ? "none" : "lax", // lax works fine for same-origin local dev
+            secure: isProduction,
         };
 
         return res
