@@ -27,7 +27,7 @@ const verifyJWT = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        return res.status(400).json({ message: "Invalid or expired token" });
+        return res.status(401).json({ message: "Invalid or expired token" });
     }
 };
 export { verifyJWT };

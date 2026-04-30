@@ -6,7 +6,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    // const [name, setName] = useState("");
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -20,7 +19,7 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        mutation.mutate({email, password });
+        mutation.mutate({ email, password });
     };
 
     return (
@@ -52,15 +51,6 @@ const Login = () => {
                     </Link>
                 </p>
                 <form onSubmit={handleSubmit}>
-                    {/* <input
-                        type="text"
-                        placeholder="Enter your name"
-                        className="w-full p-4 mb-3 rounded-lg border border-[rgba(100,140,220,0.25)]
-          bg-[rgba(10,30,80,0.5)] text-[#c8d8f0] text-sm outline-none
-          placeholder:text-[#5a7aaa] focus:border-[#4d8eff]"
-                        onChange={(e) => setName(e.target.value)}
-                    /> */}
-
                     <input
                         type="email"
                         placeholder="Enter your email"
