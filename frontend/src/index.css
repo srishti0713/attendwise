@@ -1,2 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+
 @plugin "daisyui";
+
+@theme {
+  --font-sans: 'DM Sans', sans-serif;
+  --font-playfair: 'Playfair Display', serif;
+}

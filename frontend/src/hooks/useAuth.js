@@ -7,7 +7,6 @@ const useAuth = () => {
         queryFn: async () => {
             try {
                 const user = await getCurrentUser();
-                 console.log("getCurrentUser response:", user); // ← add this
                 return user;
             } catch (error) {
                 console.log("getCurrentUser error:", error.response?.status); 
