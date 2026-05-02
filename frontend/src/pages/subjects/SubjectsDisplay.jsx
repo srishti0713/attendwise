@@ -29,7 +29,7 @@ const OverallCard = ({ subjects }) => {
     
 
     return (
-        <div className={`bg-[#D6CBFA] border border-[#6639ed] text-[#4A20C4] rounded-2xl p-5 w-full max-w-2xl mx-auto`}>
+        <div className={`bg-[#D6CBFA] border border-[#6639ed] text-[#4A20C4] rounded-2xl p-4 w-full max-w-2xl mx-auto`}>
             <p className={`text-xs font-bold uppercase tracking-widest mb-3 `}>
                 Overall Attendance
             </p>
