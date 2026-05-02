@@ -11,14 +11,14 @@ const HomePage = () => {
     if (isLoading) return <p>Loading...</p>;
 
     return (
-        <>
+        <div className="w-full max-w-2xl mx-auto">
             {/* Date */}
-            <div className="flex flex-1 justify-center text-gray-500 font-semibold pb-4 text-sm tracking-wide">
+            <div className="flex justify-center text-gray-500 font-semibold pb-4 text-sm tracking-wide">
                 {moment().format("dddd, MMMM Do YYYY")}
             </div>
 
             {/* Tab Switcher */}
-            <div className="flex mx-auto w-full max-w-sm mb-5 bg-[#E2DBF0] rounded-full p-1">
+            <div className="flex w-full mb-5 bg-[#E2DBF0] rounded-full p-1">
                 <button
                     onClick={() => setSearchParams({ tab: "attendance" })}
                     className={`flex-1 py-2 rounded-full text-xs font-bold tracking-widest transition-all ${
@@ -43,9 +43,11 @@ const HomePage = () => {
 
             {/* Content */}
             {activeTab === "attendance" && (
-                <div className="flex flex-col gap-5 sm:gap-3 md:gap-3 items-center">
+                <div className="flex flex-col gap-3 w-full">
                     {todaySubjects.length === 0 ? (
-                        <p>No classes today 🎉</p>
+                        <p className="text-center text-[#8070AA] font-medium mt-10">
+                            No classes today 🎉
+                        </p>
                     ) : (
                         todaySubjects.map((subject) => (
                             <Card
@@ -55,6 +57,7 @@ const HomePage = () => {
                                 status={subject.status}
                                 classesToSafe={subject.classesToSafeZone}
                                 classesToGoal={subject.classesToGoal}
+                                canMiss={subject.canMiss}
                             />
                         ))
                     )}
@@ -63,12 +66,12 @@ const HomePage = () => {
 
             {activeTab === "assignments" && (
                 <div className="flex flex-col gap-3 w-full">
-                    <p className="text-sm text-[#8070AA] font-semibold text-center">
+                    <p className="text-sm text-[#8070AA] font-semibold text-center mt-10">
                         Assignments coming soon
                     </p>
                 </div>
             )}
-        </>
+        </div>
     );
 };
 
