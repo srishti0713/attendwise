@@ -26,16 +26,26 @@ const CARD_STYLES = {
     },
 };
 
-const Card = ({ subject, percentage, status, classesToSafe, classesToGoal }) => {
+const Card = ({
+    subject,
+    percentage,
+    status,
+    classesToSafe,
+    classesToGoal,
+}) => {
     const styles = CARD_STYLES[status] ?? CARD_STYLES.danger;
 
     return (
-        <div className={`${styles.card} rounded-2xl p-4 w-full max-w-2xl mx-auto`}>
+        <div
+            className={`${styles.card} rounded-2xl p-4 w-full max-w-2xl mx-auto`}
+        >
             {/* Top Section */}
             <div className="flex flex-col gap-3 my-2 ml-4">
                 <div className="flex gap-4 items-center">
                     <AttendanceCircle percentage={percentage} status={status} />
-                    <h2 className="text-lg font-semibold text-gray-800">{subject}</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">
+                        {subject}
+                    </h2>
                 </div>
                 <div className="px-2 pb-1">
                     <p className="text-sm text-gray-700">

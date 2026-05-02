@@ -15,7 +15,7 @@ const Register = () => {
     const mutation = useMutation({
         mutationFn: register,
         onSuccess: async () => {
-           await queryClient.refetchQueries({ queryKey: ["user"] });
+            await queryClient.refetchQueries({ queryKey: ["user"] });
             navigate("/home");
         },
     });

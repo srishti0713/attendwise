@@ -9,7 +9,7 @@ const useAuth = () => {
                 const user = await getCurrentUser();
                 return user;
             } catch (error) {
-                console.log("getCurrentUser error:", error.response?.status); 
+                console.log("getCurrentUser error:", error.response?.status);
                 if (error.response?.status === 401) return null;
                 throw error;
             }
