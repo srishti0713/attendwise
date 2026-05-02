@@ -145,7 +145,7 @@ const loginUser = async (req, res) => {
 
 const logoutUser = async (req, res) => {
     try {
-        const isProduction = process.env.NODE_ENV === "production"; 
+        const isProduction = process.env.NODE_ENV === "production";
         //Site options
         const options = {
             httpOnly: true,

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { startReminderCron } from "./utils/reminderCron.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import subjectRoutes from "./routes/subject.routes.js";
@@ -29,5 +30,7 @@ app.use("/api/v1/subjects", subjectRoutes);
 app.use("/api/v1/semesters", semesterRoutes);
 app.use("/api/v1/timetable", timetableRoutes);
 app.use("/api/v1/assignments", assignmentRoutes);
+
+startReminderCron();
 
 export default app;
