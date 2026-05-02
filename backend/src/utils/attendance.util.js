@@ -28,8 +28,24 @@ export const getAttendanceStats = (attendance = [], safe, target) => {
         return needed;
     };
 
+    // Helper to calculate how many classes can be missed safely
+    const classesMissable = (att, tot, threshold) => {
+        if (tot === 0) return 0;
+
+        let missable = 0;
+
+        while (((att) / (tot + missable + 1)) * 100 >= threshold) {
+            missable++;
+        }
+
+        return missable;
+    };
+
     const safeNeeded = classesNeeded(attended, total, safe);
     const targetNeeded = classesNeeded(attended, total, target);
+
+    // How many classes can be missed without falling below safe threshold
+    const canMiss = current >= safe ? classesMissable(attended, total, safe) : 0;
 
     //  Status logic
     let status, message;
@@ -51,7 +67,30 @@ export const getAttendanceStats = (attendance = [], safe, target) => {
         attendancePercentage: Number(current.toFixed(2)),
         classesToSafeZone: safeNeeded,
         classesToGoal: targetNeeded,
+        canMiss,
         status,
         message,
+    };
+};
+
+// Overall attendance across all subjects
+export const getOverallAttendance = (subjects = []) => {
+    let totalAttended = 0;
+    let totalClasses = 0;
+
+    for (const subject of subjects) {
+        totalAttended += subject.attended ?? 0;
+        totalClasses += subject.total ?? 0;
+    }
+
+    const overallPercentage =
+        totalClasses === 0
+            ? 0
+            : Number(((totalAttended / totalClasses) * 100).toFixed(2));
+
+    return {
+        totalAttended,
+        totalClasses,
+        overallPercentage,
     };
 };

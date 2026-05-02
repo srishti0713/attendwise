@@ -26,68 +26,57 @@ const CARD_STYLES = {
     },
 };
 
-const Card = ({
-    subject,
-    percentage,
-    status,
-    classesToSafe,
-    classesToGoal,
-}) => {
+const Card = ({ subject, percentage, status, classesToSafe, classesToGoal, canMiss }) => {
     const styles = CARD_STYLES[status] ?? CARD_STYLES.danger;
 
     return (
-        <div
-            className={`${styles.card} rounded-2xl p-4 w-full max-w-2xl mx-auto`}
-        >
+        <div className={`${styles.card} rounded-2xl px-8 py-4 w-full overflow-hidden`}>
             {/* Top Section */}
-            <div className="flex flex-col gap-3 my-2 ml-4">
+            <div className="flex flex-col gap-2 mb-3">
                 <div className="flex gap-4 items-center">
                     <AttendanceCircle percentage={percentage} status={status} />
                     <h2 className="text-lg font-semibold text-gray-800">
                         {subject}
                     </h2>
                 </div>
-                <div className="px-2 pb-1">
-                    <p className="text-sm text-gray-700">
-                        {classesToSafe > 0
-                            ? `You need to attend ${classesToSafe} classes`
-                            : classesToGoal > 0
-                              ? `You need to attend ${classesToGoal} classes`
-                              : ""}
-                    </p>
-                </div>
+                <p className="text-sm text-gray-700 pl-1">
+                    {classesToSafe > 0
+                        ? `You need to attend ${classesToSafe} ${classesToSafe === 1 ? 'class' : 'classes'}`
+                        : classesToGoal > 0
+                          ? `You need to attend ${classesToGoal} ${classesToGoal === 1 ? 'class' : 'classes'}`
+                          : canMiss > 0
+                            ? `You can miss ${canMiss}  ${canMiss === 1 ? 'class' : 'classes'}`
+                            : ""}
+                </p>
             </div>
 
-            {/* Assignment + Action Buttons */}
-            <div className="flex flex-col gap-3">
-                <div className="flex items-center min-w-md gap-2 mx-auto">
+            {/* Bottom Row */}
+            <div className="flex items-center gap-2 w-full">
+                <Button
+                    className={`btn-sm font-semibold rounded-xl shrink-0 ${styles.button}`}
+                    variant=""
+                >
+                    + Add Assignment
+                </Button>
+                <div className="flex gap-2 ml-auto shrink-0">
                     <Button
-                        className={`btn-sm flex-1 font-semibold w-16 rounded-xl ${styles.button}`}
+                        className={`btn-sm border-[#6639ed] shadow-sm rounded-xl w-9 h-9 ${styles.ban}`}
                         variant=""
                     >
-                        + Add Assignment
+                        <Ban size={16} />
                     </Button>
-
-                    <div className="flex gap-2 items-center">
-                        <Button
-                            className={`btn-xs btn-circleborder border-[#6639ed] shadow-sm rounded-xl w-9 h-9 ${styles.ban}`}
-                            variant=""
-                        >
-                            <Ban size={16} />
-                        </Button>
-                        <Button
-                            className={`btn-xs btn-circleborder border-[#45685a] shadow-sm rounded-xl w-9 h-9 ${styles.check}`}
-                            variant=""
-                        >
-                            <Check size={16} />
-                        </Button>
-                        <Button
-                            className={`btn-xs btn-circle border-[#893e53] shadow-sm rounded-xl w-9 h-9 ${styles.x}`}
-                            variant=""
-                        >
-                            <X size={16} />
-                        </Button>
-                    </div>
+                    <Button
+                        className={`btn-sm border-[#45685a] shadow-sm rounded-xl w-9 h-9 ${styles.check}`}
+                        variant=""
+                    >
+                        <Check size={16} />
+                    </Button>
+                    <Button
+                        className={`btn-sm border-[#893e53] shadow-sm rounded-xl w-9 h-9 ${styles.x}`}
+                        variant=""
+                    >
+                        <X size={16} />
+                    </Button>
                 </div>
             </div>
         </div>

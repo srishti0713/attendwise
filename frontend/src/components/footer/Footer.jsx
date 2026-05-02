@@ -1,65 +1,58 @@
-// import { TextAlignJustify, CalendarDays, Grid3x3 } from "lucide-react";
-// import Button from "../buttons/Button";
-// import { useNavigate } from "react-router-dom";
-
-// const Footer = () => {
-//     const navigate = useNavigate();
-//     return (
-//         <div className="dock bg-[#F2EEE8] border-t border-[#E2DBF0]">
-//             <Button
-//                 className="text-[#8070AA] bg-transparent border-none shadow-none hover:text-[#4A20C4]"
-//                 onClick={() => navigate("/subjects")}
-//             >
-//                 <TextAlignJustify size={20} />
-//             </Button>
-
-//             <Button
-//                 className="dock-active bg-[#1A1A2E] text-white border-none rounded-full w-12 h-12 flex items-center justify-center shadow-md hover:bg-[#2D2D4A]"
-//                 onClick={() => navigate("/calendar")}
-//             >
-//                 <CalendarDays size={20} />
-//             </Button>
-
-//             <Button
-//                 className="text-[#8070AA] bg-transparent border-none shadow-none hover:text-[#4A20C4]"
-//                 onClick={() => navigate("/timetable")}
-//             >
-//                 <Grid3x3 size={20} />
-//             </Button>
-//         </div>
-//     );
-// };
-
-// export default Footer;
-
-import { TextAlignJustify, CalendarDays, Grid3x3 } from "lucide-react";
+import { TextAlignJustify, CalendarDays, Grid3x3, House } from "lucide-react";
 import Button from "../buttons/Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Footer = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const path = location.pathname;
+
+    const tabs = [
+        { icon: <House size={20} />, route: "/home" },
+        { icon: <TextAlignJustify size={20} />, route: "/subjects" },
+        { icon: <CalendarDays size={20} />, route: "/calendar" },
+        { icon: <Grid3x3 size={20} />, route: "/timetable" },
+    ];
+
     return (
-        <div className="dock bg-linear-to-br from-[#EDE8F5] via-[#F2EEE8] to-[#E8F0F5] border-t border-[#E2DBF0]">
-            <Button
-                className="text-[#8070AA] bg-transparent border-none shadow-none hover:text-[#4A20C4]"
-                onClick={() => navigate("/subjects")}
-            >
-                <TextAlignJustify size={20} />
-            </Button>
-
-            <Button
-                className="dock-active bg-[#1A1A2E] text-white border-none rounded-full w-12 h-12 flex items-center justify-center shadow-md hover:bg-[#2D2D4A]"
-                onClick={() => navigate("/calendar")}
-            >
-                <CalendarDays size={20} />
-            </Button>
-
-            <Button
-                className="text-[#8070AA] bg-transparent border-none shadow-none hover:text-[#4A20C4]"
-                onClick={() => navigate("/timetable")}
-            >
-                <Grid3x3 size={20} />
-            </Button>
+        <div className="bg-linear-to-br from-[#EDE8F5] via-[#F2EEE8] to-[#E8F0F5] border-t border-[#E2DBF0] flex justify-around items-center px-6 py-3">
+            {tabs.map(({ icon, route }) => {
+                const isActive = path === route;
+                return (
+                    <button
+                        key={route}
+                        onClick={() => navigate(route)}
+                        className="flex flex-col items-center gap-1 border-none bg-transparent cursor-pointer"
+                    >
+                        
+                            <div
+                                className={`px-6 py-3 rounded-full flex items-center justify-center transition-all ${
+                                    isActive
+                                        ? "bg-[#1A1A2E] text-white"
+                                        : "bg-[#D6CBFA] text-[#4A20C4]"
+                                }`}
+                            >
+                                {icon}
+                            </div>
+                        
+                            {/* <div className="flex flex-col items-center gap-1">
+                                <div
+                                    className={`p-2 rounded-xl transition-all ${
+                                        isActive
+                                            ? "text-[#4A20C4]"
+                                            : "text-[#8070AA]"
+                                    }`}
+                                >
+                                    {icon}
+                                </div>
+                                {isActive && (
+                                    <div className="w-4 h-1 rounded-full bg-[#9B72F5]" />
+                                )}
+                            </div> */}
+                       
+                    </button>
+                );
+            })}
         </div>
     );
 };
