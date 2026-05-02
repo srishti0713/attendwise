@@ -2,6 +2,7 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import LandingPage from "../pages/core/LandingPage";
 import HomePage from "../pages/home/HomePage";
+import ProfilePage from "../pages/profile/ProfilePage";
 import SubjectsDisplay from "../pages/subjects/SubjectsDisplay";
 
 export const routes = [
@@ -32,6 +33,12 @@ export const routes = [
     {
         path: "/home",
         element: <HomePage />,
+        protected: true,
+        publicOnly: false,
+    },
+    {
+        path: "/profile",
+        element: <ProfilePage />,
         protected: true,
         publicOnly: false,
     },
