@@ -32,7 +32,7 @@ const Card = ({ subject, percentage, status, classesToSafe, classesToGoal }) => 
     return (
         <div className={`${styles.card} rounded-2xl p-4 w-full max-w-2xl mx-auto`}>
             {/* Top Section */}
-            <div className="flex flex-col gap-3 mb-2">
+            <div className="flex flex-col gap-3 my-2 ml-4">
                 <div className="flex gap-4 items-center">
                     <AttendanceCircle percentage={percentage} status={status} />
                     <h2 className="text-lg font-semibold text-gray-800">{subject}</h2>
@@ -50,9 +50,9 @@ const Card = ({ subject, percentage, status, classesToSafe, classesToGoal }) => 
 
             {/* Assignment + Action Buttons */}
             <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2 mx-2">
+                <div className="flex items-center min-w-md gap-2 mx-auto">
                     <Button
-                        className={`btn-sm flex-1 font-semibold rounded-xl ${styles.button}`}
+                        className={`btn-sm flex-1 font-semibold w-16 rounded-xl ${styles.button}`}
                         variant=""
                     >
                         + Add Assignment
@@ -60,19 +60,19 @@ const Card = ({ subject, percentage, status, classesToSafe, classesToGoal }) => 
 
                     <div className="flex gap-2 items-center">
                         <Button
-                            className={`btn-xs btn-circle border-none shadow-none rounded-xl w-9 h-9 ${styles.ban}`}
+                            className={`btn-xs btn-circleborder border-[#6639ed] shadow-sm rounded-xl w-9 h-9 ${styles.ban}`}
                             variant=""
                         >
                             <Ban size={16} />
                         </Button>
                         <Button
-                            className={`btn-xs btn-circle border-none shadow-none rounded-xl w-9 h-9 ${styles.check}`}
+                            className={`btn-xs btn-circleborder border-[#45685a] shadow-sm rounded-xl w-9 h-9 ${styles.check}`}
                             variant=""
                         >
                             <Check size={16} />
                         </Button>
                         <Button
-                            className={`btn-xs btn-circle border-none shadow-none rounded-xl w-9 h-9 ${styles.x}`}
+                            className={`btn-xs btn-circle border-[#893e53] shadow-sm rounded-xl w-9 h-9 ${styles.x}`}
                             variant=""
                         >
                             <X size={16} />
