@@ -2,63 +2,80 @@ import Button from "../buttons/Button.jsx";
 import { Check, X, Ban } from "lucide-react";
 import AttendanceCircle from "./AttendanceCircle.jsx";
 
-const Card = ({
-    subject,
-    percentage,
-    status,
-    classesToSafe,
-    classesToGoal,
-}) => {
+const CARD_STYLES = {
+    safe: {
+        card: "bg-[#B8E8CC] border border-[#8FD4AA]",
+        button: "bg-[#2E8B57] text-white hover:bg-[#256E45] border-none",
+        ban: "bg-[#D6CBFA] text-[#4A20C4]",
+        check: "bg-[#8FD4AA] text-[#1A5C38]",
+        x: "bg-[#F0ABBE] text-[#7A1530]",
+    },
+    moderate: {
+        card: "bg-[#F5E6A3] border border-[#E8CC6A]",
+        button: "bg-[#C97A00] text-white hover:bg-[#A66200] border-none",
+        ban: "bg-[#D6CBFA] text-[#4A20C4]",
+        check: "bg-[#8FD4AA] text-[#1A5C38]",
+        x: "bg-[#F0ABBE] text-[#7A1530]",
+    },
+    danger: {
+        card: "bg-[#F5B8C8] border border-[#E88FA8]",
+        button: "bg-[#C0355A] text-white hover:bg-[#9E2748] border-none",
+        ban: "bg-[#D6CBFA] text-[#4A20C4]",
+        check: "bg-[#8FD4AA] text-[#1A5C38]",
+        x: "bg-[#F0ABBE] text-[#7A1530]",
+    },
+};
+
+const Card = ({ subject, percentage, status, classesToSafe, classesToGoal }) => {
+    const styles = CARD_STYLES[status] ?? CARD_STYLES.danger;
+
     return (
-        <div className="card bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-4 w-full max-w-sm mx-auto">
-            {/* Top Section - Subject + Percentage */}
-            <div className="flex flex-col gap-3  mb-2">
+        <div className={`${styles.card} rounded-2xl p-4 w-full max-w-2xl mx-auto`}>
+            {/* Top Section */}
+            <div className="flex flex-col gap-3 mb-2">
                 <div className="flex gap-4 items-center">
                     <AttendanceCircle percentage={percentage} status={status} />
-                    <h2 className="text-lg font-semibold text-gray-800">
-                        {subject}
-                    </h2>
+                    <h2 className="text-lg font-semibold text-gray-800">{subject}</h2>
                 </div>
                 <div className="px-2 pb-1">
-                    <p className="text-sm text-black">
+                    <p className="text-sm text-gray-700">
                         {classesToSafe > 0
-                            ? ` You need to attend ${classesToSafe} classes`
+                            ? `You need to attend ${classesToSafe} classes`
                             : classesToGoal > 0
-                              ? ` You need to attend ${classesToGoal} classes`
+                              ? `You need to attend ${classesToGoal} classes`
                               : ""}
                     </p>
                 </div>
-                {/* <div className="badge badge-primary text-white px-3 py-2 text-sm">
-                    {percentage}%
-                </div> */}
             </div>
 
             {/* Assignment + Action Buttons */}
             <div className="flex flex-col gap-3">
-                {/* Row: Add Assignment + Buttons */}
-                <div className="flex gap-2 mx-4">
-                    <Button className="btn-sm flex-1" variant="ghost">
+                <div className="flex items-center gap-2 mx-2">
+                    <Button
+                        className={`btn-sm flex-1 font-semibold rounded-xl ${styles.button}`}
+                        variant=""
+                    >
                         + Add Assignment
                     </Button>
 
-                    <div className="flex gap-2 justify-center mt-1">
+                    <div className="flex gap-2 items-center">
                         <Button
-                            className="btn-xs btn-circle  bg-transparent shadow-none border-none text-orange-500"
-                            variant="ghost"
+                            className={`btn-xs btn-circle border-none shadow-none rounded-xl w-9 h-9 ${styles.ban}`}
+                            variant=""
                         >
-                            <Ban />
+                            <Ban size={16} />
                         </Button>
                         <Button
-                            className="btn-xs btn-neutral  bg-transparent shadow-none border-none text-green-700"
-                            variant="ghost"
+                            className={`btn-xs btn-circle border-none shadow-none rounded-xl w-9 h-9 ${styles.check}`}
+                            variant=""
                         >
-                            <Check />
+                            <Check size={16} />
                         </Button>
                         <Button
-                            className="btn-xs btn-circle  bg-transparent shadow-none border-none text-red-700"
-                            variant="ghost"
+                            className={`btn-xs btn-circle border-none shadow-none rounded-xl w-9 h-9 ${styles.x}`}
+                            variant=""
                         >
-                            <X />
+                            <X size={16} />
                         </Button>
                     </div>
                 </div>
