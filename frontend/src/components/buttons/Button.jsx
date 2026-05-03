@@ -1,6 +1,7 @@
 import React from "react";
 //reusable button component
 const Button = ({
+    type = "button",
     label,
     children,
     variant = "",

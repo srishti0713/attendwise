@@ -35,7 +35,9 @@ const Card = ({ subject, percentage, status, classesToSafe, classesToGoal, canMi
             <div className="flex flex-col gap-2 mb-3">
                 <div className="flex gap-4 items-center">
                     <AttendanceCircle percentage={percentage} status={status} />
-                    <h2 className="text-lg font-semibold text-gray-800">{subject}</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">
+                        {subject}
+                    </h2>
                 </div>
                 <p className="text-sm text-gray-700 pl-1">
                     {classesToSafe > 0
