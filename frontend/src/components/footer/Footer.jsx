@@ -35,20 +35,7 @@ const Footer = () => {
                                 {icon}
                             </div>
                         
-                            {/* <div className="flex flex-col items-center gap-1">
-                                <div
-                                    className={`p-2 rounded-xl transition-all ${
-                                        isActive
-                                            ? "text-[#4A20C4]"
-                                            : "text-[#8070AA]"
-                                    }`}
-                                >
-                                    {icon}
-                                </div>
-                                {isActive && (
-                                    <div className="w-4 h-1 rounded-full bg-[#9B72F5]" />
-                                )}
-                            </div> */}
+                           
                        
                     </button>
                 );
