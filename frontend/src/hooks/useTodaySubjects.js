@@ -19,7 +19,6 @@ const useTodaySubjects = () => {
 
     // Get today's date
     const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
-    console.log("Today: ", today);
 
     // Extract today's subjects
     const todaySubjects = useMemo(() => {
@@ -27,8 +26,6 @@ const useTodaySubjects = () => {
 
         return timetable.timetable[today] || [];
     }, [timetable, today]);
-
-    console.log("Today Subjects: ", todaySubjects);
 
     return {
         semester,

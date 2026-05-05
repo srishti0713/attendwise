@@ -1,7 +1,9 @@
 import { api } from "./axios";
 
-export const addSubject = async (formData, semesterId) => {
-    const { data } = await api.post(`/subjects/${semesterId}`, formData);
+export const addSubject = async (payload, semesterId) => {
+    const { data } = await api.post(`/subjects/${semesterId}`, payload, {
+        headers: { "Content-Type": "application/json" },
+    });
     return data;
 };
 
@@ -15,8 +17,10 @@ export const getSubject = async (subjectId) => {
     return data;
 };
 
-export const updateSubject = async (subjectId, formData) => {
-    const { data } = await api.patch(`/subjects/${subjectId}`, formData);
+export const updateSubject = async (subjectId, payload) => {
+    const { data } = await api.patch(`/subjects/${subjectId}`, payload, {
+        headers: { "Content-Type": "application/json" },
+    });
     return data;
 };
 

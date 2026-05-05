@@ -28,7 +28,14 @@ const CARD_STYLES = {
     },
 };
 
-const Card = ({ subject, percentage, status, classesToSafe, classesToGoal, canMiss, subjectId, semesterId }) => {
+const Card = ({
+    subject,
+    percentage,
+    status,
+    classesToSafe,
+    classesToGoal,
+    canMiss,
+}) => {
     const styles = CARD_STYLES[status] ?? CARD_STYLES.danger;
 
     const queryClient = useQueryClient();
@@ -46,7 +53,9 @@ const Card = ({ subject, percentage, status, classesToSafe, classesToGoal, canMi
 
 
     return (
-        <div className={`${styles.card} rounded-2xl px-8 py-4 w-full overflow-hidden`}>
+        <div
+            className={`${styles.card} rounded-2xl px-8 py-4 w-full overflow-hidden`}
+        >
             {/* Top Section */}
             <div className="flex flex-col gap-2 mb-3">
                 <div className="flex gap-4 items-center">
@@ -57,11 +66,11 @@ const Card = ({ subject, percentage, status, classesToSafe, classesToGoal, canMi
                 </div>
                 <p className="text-sm text-gray-700 pl-1">
                     {classesToSafe > 0
-                        ? `You need to attend ${classesToSafe} ${classesToSafe === 1 ? 'class' : 'classes'}`
+                        ? `You need to attend ${classesToSafe} ${classesToSafe === 1 ? "class" : "classes"}`
                         : classesToGoal > 0
-                          ? `You need to attend ${classesToGoal} ${classesToGoal === 1 ? 'class' : 'classes'}`
+                          ? `You need to attend ${classesToGoal} ${classesToGoal === 1 ? "class" : "classes"}`
                           : canMiss > 0
-                            ? `You can miss ${canMiss}  ${canMiss === 1 ? 'class' : 'classes'}`
+                            ? `You can miss ${canMiss}  ${canMiss === 1 ? "class" : "classes"}`
                             : ""}
                 </p>
             </div>

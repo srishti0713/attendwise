@@ -34,7 +34,7 @@ export const getAttendanceStats = (attendance = [], safe, target) => {
 
         let missable = 0;
 
-        while (((att) / (tot + missable + 1)) * 100 >= threshold) {
+        while ((att / (tot + missable + 1)) * 100 >= threshold) {
             missable++;
         }
 
@@ -45,7 +45,8 @@ export const getAttendanceStats = (attendance = [], safe, target) => {
     const targetNeeded = classesNeeded(attended, total, target);
 
     // How many classes can be missed without falling below safe threshold
-    const canMiss = current >= safe ? classesMissable(attended, total, safe) : 0;
+    const canMiss =
+        current >= safe ? classesMissable(attended, total, safe) : 0;
 
     //  Status logic
     let status, message;

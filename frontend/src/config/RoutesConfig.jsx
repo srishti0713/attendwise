@@ -6,6 +6,8 @@ import EditProfilePage from "../pages/profile/EditProfilePage";
 import ProfilePage from "../pages/profile/ProfilePage";
 import SubjectsDisplay from "../pages/subjects/SubjectsDisplay";
 import TimetablePage from "../pages/timetable/Timetable";
+import AddSemesterPage from "../pages/semester/AddSemesterPage";
+import EditSemesterPage from "../pages/semester/EditSemesterPage";
 
 export const routes = [
     {
@@ -53,6 +55,14 @@ export const routes = [
     {
         path: "/timetable",
         element: <TimetablePage />,
+        path: "/setup-semester",
+        element: <AddSemesterPage />,
+        protected: true,
+        publicOnly: false,
+    },
+    {
+        path: "/semesters/:semesterId/edit",
+        element: <EditSemesterPage />,
         protected: true,
         publicOnly: false,
     },

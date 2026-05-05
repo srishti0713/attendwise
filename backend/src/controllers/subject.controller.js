@@ -4,7 +4,10 @@ import Semester from "../models/semester.model.js";
 import { throwError } from "../lib/api.error.js";
 import { MAX_TITLE_LENGTH, MIN_TITLE_LENGTH } from "../lib/configuration.js";
 import mongoose from "mongoose";
-import { getAttendanceStats, getOverallAttendance } from "../utils/attendance.util.js";
+import {
+    getAttendanceStats,
+    getOverallAttendance,
+} from "../utils/attendance.util.js";
 import Timetable from "../models/timetable.model.js";
 import Assignment from "../models/assignment.model.js";
 
@@ -32,28 +35,28 @@ export const getSubjects = async (req, res) => {
             return res.status(404).json({ message: "Subjects not found" });
 
         // Attendance details calculation
-       const result = semester.subjects.map((subject) => {
-    const stats = getAttendanceStats(
-        subject.attendance,
-        user.safePercentage,
-        user.targetPercentage,
-    );
+        const result = semester.subjects.map((subject) => {
+            const stats = getAttendanceStats(
+                subject.attendance,
+                user.safePercentage,
+                user.targetPercentage,
+            );
 
-    return {
-        ...subject,
-        ...stats,
-    };
-});
+            return {
+                ...subject,
+                ...stats,
+            };
+        });
 
-// Calculate overall AFTER stats are computed
-const overallStats = getOverallAttendance(result);
+        // Calculate overall AFTER stats are computed
+        const overallStats = getOverallAttendance(result);
 
-const finalResult = result.map((subject) => ({
-    ...subject,
-    ...overallStats,
-}));
+        const finalResult = result.map((subject) => ({
+            ...subject,
+            ...overallStats,
+        }));
 
-return res.status(200).json(finalResult);
+        return res.status(200).json(finalResult);
     } catch (error) {
         return throwError(res, error, "getSubjects");
     }
@@ -278,8 +281,6 @@ export const updateSubject = async (req, res) => {
             user.safePercentage,
             user.targetPercentage,
         );
-
-       
 
         return res.status(200).json({
             ...subject.toObject(),
