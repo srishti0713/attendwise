@@ -63,12 +63,10 @@ const registerUser = async (req, res) => {
         //Check for existing user
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res
-                .status(400)
-                .json({
-                    message:
-                        "Email already in use\n Please login if you have an account ",
-                });
+            return res.status(400).json({
+                message:
+                    "Email already in use\n Please login if you have an account ",
+            });
         }
 
         //Hash password

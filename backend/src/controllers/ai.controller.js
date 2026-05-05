@@ -1,41 +1,71 @@
-import { GoogleGenAI } from "@google/genai";
-import * as fs from "node:fs";
+import fs from "node:fs";
+import aiService from "../services/ai.service.js";
+import Timetable from "../models/timetable.model.js";
+import Subject from "../models/subject.model.js";
+import { throwError } from "../lib/api.error.js";
 
 export const extractTimetable = async (req, res) => {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No image uploaded" });
+        }
 
-    const base64ImageFile = fs.readFileSync("timetable.png", {
-        encoding: "base64",
-    });
+        const { parsed, raw } = await aiService.extractTimetableFromImage(
+            req.file.path,
+            req.file.mimetype,
+        );
 
-    const prompt = `Extract the subjects from this timetable into the following JSON format.
-IMPORTANT: Include only days and subject short-codes.
-Omit all empty ("X") slots and omit all timings.
-Only output the following as:
-{
-  "days": {
-    "Monday": ["AD2", "CSW2"],
-    "Tuesday": ["AD2", "CSW2"]
-  }
-}`;
+        // --- TEST ---
+        console.log(parsed);
+        console.log(" ");
+        console.log(raw);
+        // --- TEST ---
 
-    const contents = [
-        {
-            inlineData: {
-                mimeType: "image/png",
-                data: base64ImageFile,
-            },
-        },
-        { text: prompt },
-    ];
+        const timetable = {};
 
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-lite",
-        generationConfig: {
-            responseMimeType: "application/json",
-        },
-        contents: contents,
-    });
+        for (const day of Object.keys(parsed.days)) {
+            const subjects = parsed.days[day];
 
-    console.log(response.text);
+            const subjectDocs = await Subject.find({
+                subjectName: { $in: subjects },
+                userId: req.user._id,
+            });
+
+            const map = {};
+            subjectDocs.forEach((s) => {
+                map[s.subjectName] = s._id;
+            });
+
+            timetable[day] = subjects.map((code) => map[code]).filter(Boolean);
+        }
+
+        const newTimetable = await Timetable.create({
+            semesterId: req.body.semesterId,
+            timetable,
+        });
+
+        fs.unlinkSync(req.file.path);
+
+        // --- TEST (REMOVE LATER) ---
+        console.log(`
+            NEW TIMETABLE:
+            ${newTimetable}
+            AI RAW:
+            ${parsed}
+            `);
+        // --- TEST (REMOVE LATER) ---
+
+        return res.status(200).json({
+            data: newTimetable,
+            aiRaw: parsed,
+        });
+    } catch (error) {
+        console.log(error);
+
+        if (req.file?.path && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+
+        return throwError(res, error, "extractTimetable");
+    }
 };

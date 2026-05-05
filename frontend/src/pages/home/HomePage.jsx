@@ -46,7 +46,7 @@ const HomePage = () => {
                 <div className="flex flex-col gap-3 w-full">
                     {todaySubjects.length === 0 ? (
                         <p className="text-center text-[#8070AA] font-medium mt-10">
-                            No classes today 🎉
+                            No classes today!
                         </p>
                     ) : (
                         todaySubjects.map((subject) => (
