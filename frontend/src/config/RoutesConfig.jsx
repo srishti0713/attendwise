@@ -55,6 +55,10 @@ export const routes = [
     {
         path: "/timetable",
         element: <TimetablePage />,
+        protected: true,
+        publicOnly: false,
+    },
+    {
         path: "/setup-semester",
         element: <AddSemesterPage />,
         protected: true,
