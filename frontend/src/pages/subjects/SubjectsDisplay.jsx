@@ -43,7 +43,9 @@ const SubjectRow = ({ subject }) => {
     const cardStyle = CARD_STYLES[subject.status] ?? CARD_STYLES.danger;
 
     return (
-        <div className={`${cardStyle} rounded-2xl p-4 w-full max-w-2xl mx-auto`}>
+        <div
+            className={`${cardStyle} rounded-2xl p-4 w-full max-w-2xl mx-auto`}
+        >
             <div className="flex items-center gap-4">
                 <AttendanceCircle
                     percentage={subject.attendancePercentage}

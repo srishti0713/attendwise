@@ -2,10 +2,19 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Button from "../../components/buttons/Button.jsx";
-import { getSemester, editSemester } from "../../api/semester.api.js";
-import { getSubjects, updateSubject } from "../../api/subject.api.js";
+import {
+    getSemester,
+    editSemester,
+    deleteSemester,
+} from "../../api/semester.api.js";
+import {
+    getSubjects,
+    updateSubject,
+    deleteSubject,
+    addSubject,
+} from "../../api/subject.api.js";
 
-// ── Error banner ──────────────────────────────────────────────────────────────
+// Error banner
 const ErrorBanner = ({ message }) =>
     message ? (
         <div className="bg-[#FEF0F0] border border-[#FDDCDC] rounded-2xl px-5 py-3 mb-3 flex items-center gap-3">
@@ -14,7 +23,7 @@ const ErrorBanner = ({ message }) =>
         </div>
     ) : null;
 
-// ── Success banner ────────────────────────────────────────────────────────────
+// Success banner
 const SuccessBanner = ({ message }) =>
     message ? (
         <div className="bg-[#E6F7EF] border border-[#9FD9B8] rounded-2xl px-5 py-3 mb-3 flex items-center gap-3">
@@ -23,7 +32,7 @@ const SuccessBanner = ({ message }) =>
         </div>
     ) : null;
 
-// ── Checkbox ──────────────────────────────────────────────────────────────────
+//  Checkbox
 const Checkbox = ({ checked, onChange, disabled }) => (
     <label
         className={`flex items-center gap-3 cursor-pointer select-none ${disabled ? "opacity-50 pointer-events-none" : ""}`}
@@ -66,23 +75,25 @@ const Checkbox = ({ checked, onChange, disabled }) => (
     </label>
 );
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+//  Main page
 const EditSemesterPage = () => {
     const { semesterId } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    // ── Semester state ────────────────────────────────────────────────────────
+    // Semester state
     const [semesterName, setSemesterName] = useState("");
     const [isCurrent, setIsCurrent] = useState(false);
     const [semesterError, setSemesterError] = useState("");
     const [semesterSuccess, setSemesterSuccess] = useState("");
 
-    // ── Subjects state ────────────────────────────────────────────────────────
+    // Subjects state
     const [subjectStates, setSubjectStates] = useState({});
     const initializedRef = useRef(false);
+    const [newSubjects, setNewSubjects] = useState([]);
+    const counterRef = useRef(0);
 
-    // ── Queries ───────────────────────────────────────────────────────────────
+    // Queries
     const { data: semesterData, isLoading: semesterLoading } = useQuery({
         queryKey: ["semester", semesterId],
         queryFn: () => getSemester(semesterId),
@@ -95,7 +106,7 @@ const EditSemesterPage = () => {
 
     const isLoading = semesterLoading || subjectsLoading;
 
-    // ── Sync semester data ────────────────────────────────────────────────────
+    //  Sync semester data
     useEffect(() => {
         if (semesterData) {
             setSemesterName(semesterData.semesterName);
@@ -103,12 +114,12 @@ const EditSemesterPage = () => {
         }
     }, [semesterData]);
 
-    // ── Reset init when semester changes ──────────────────────────────────────
+    //  Reset init when semester changes
     useEffect(() => {
         initializedRef.current = false;
     }, [semesterId]);
 
-    // ── Sync subjects ─────────────────────────────────────────────────────────
+    //  Sync subjects data and initialize subject states
     useEffect(() => {
         if (subjectsData && !initializedRef.current) {
             initializedRef.current = true;
@@ -125,7 +136,7 @@ const EditSemesterPage = () => {
         }
     }, [subjectsData]);
 
-    // ── Mutations ─────────────────────────────────────────────────────────────
+    //  Mutations
     const semesterMutation = useMutation({
         mutationFn: ({ semesterId, payload }) =>
             editSemester(semesterId, payload),
@@ -184,7 +195,63 @@ const EditSemesterPage = () => {
         },
     });
 
-    // ── Handlers ──────────────────────────────────────────────────────────────
+    const deleteSemesterMutation = useMutation({
+        mutationFn: (semesterId) => deleteSemester(semesterId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["semesters"] });
+            navigate(-1);
+        },
+        onError: (err) => {
+            setSemesterError(
+                err?.response?.data?.message || "Failed to delete semester",
+            );
+        },
+    });
+
+    const addSubjectMutation = useMutation({
+        mutationFn: ({ formData, semesterId }) =>
+            addSubject(formData, semesterId),
+        onSuccess: (_, { tempId }) => {
+            setNewSubjects((prev) => prev.filter((s) => s.id !== tempId));
+            queryClient.invalidateQueries({
+                queryKey: ["subjects", semesterId],
+            });
+        },
+        onError: (err, { tempId }) => {
+            setNewSubjects((prev) =>
+                prev.map((s) =>
+                    s.id === tempId
+                        ? {
+                              ...s,
+                              saving: false,
+                              error:
+                                  err?.response?.data?.message ||
+                                  "Failed to add subject",
+                          }
+                        : s,
+                ),
+            );
+        },
+    });
+
+    const deleteSubjectMutation = useMutation({
+        mutationFn: (subjectId) => deleteSubject(subjectId),
+        onSuccess: (_, subjectId) => {
+            setSubjectStates((prev) => {
+                const updated = { ...prev };
+                delete updated[subjectId];
+                return updated;
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["subjects", semesterId],
+            });
+        },
+        onError: (err) => {
+            console.error(err);
+        },
+    });
+
+    // Handlers
     const handleSaveSemester = () => {
         setSemesterError("");
         setSemesterSuccess("");
@@ -248,7 +315,70 @@ const EditSemesterPage = () => {
         subjectMutation.mutate({ subjectId, formData });
     };
 
-    // ── Loading skeleton ──────────────────────────────────────────────────────
+    const handleSaveNewSubject = (tempId) => {
+        const subject = newSubjects.find((s) => s.id === tempId);
+        if (!subject) return;
+
+        if (!subject.name.trim()) {
+            setNewSubjects((prev) =>
+                prev.map((s) =>
+                    s.id === tempId
+                        ? { ...s, error: "Subject name cannot be empty" }
+                        : s,
+                ),
+            );
+            return;
+        }
+
+        setNewSubjects((prev) =>
+            prev.map((s) =>
+                s.id === tempId ? { ...s, saving: true, error: "" } : s,
+            ),
+        );
+
+        const formData = new FormData();
+        formData.append("subjectName", subject.name.trim());
+
+        addSubjectMutation.mutate({
+            semesterId,
+            formData,
+            tempId,
+        });
+    };
+
+    const handleDeleteSemester = () => {
+        if (!window.confirm("Delete this semester? This cannot be undone."))
+            return;
+        deleteSemesterMutation.mutate(semesterId);
+    };
+
+    const handleDeleteSubject = (subjectId) => {
+        if (!window.confirm("Delete this subject?")) return;
+        deleteSubjectMutation.mutate(subjectId);
+    };
+
+    // Subject helpers
+    const addSubjectRow = () => {
+        counterRef.current += 1;
+        setNewSubjects((prev) => [
+            ...prev,
+            { id: counterRef.current, name: "", saving: false, error: "" },
+        ]);
+    };
+
+    const removeNewSubjectRow = (id) => {
+        setNewSubjects((prev) => prev.filter((s) => s.id !== id));
+    };
+
+    const updateNewSubjectName = (id, value) => {
+        setNewSubjects((prev) =>
+            prev.map((s) =>
+                s.id === id ? { ...s, name: value, error: "" } : s,
+            ),
+        );
+    };
+
+    // Loading section
     if (isLoading) {
         return (
             <div className="w-full max-w-lg mx-auto pb-24">
@@ -323,6 +453,16 @@ const EditSemesterPage = () => {
                 >
                     {semesterMutation.isPending ? "Saving…" : "Save semester"}
                 </Button>
+                <Button
+                    onClick={handleDeleteSemester}
+                    disabled={deleteSemesterMutation.isPending}
+                    className="bg-[#FEF0F0] text-[#C0392B] border border-[#FDDCDC] rounded-xl py-3 text-sm font-bold mt-2"
+                    fullWidth
+                >
+                    {deleteSemesterMutation.isPending
+                        ? "Deleting…"
+                        : "Delete semester"}
+                </Button>
             </div>
 
             {/* ── Subjects ── */}
@@ -359,15 +499,29 @@ const EditSemesterPage = () => {
                                         className="flex-1 bg-[#F5F0FF] border border-[#E2DBF0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1A1A2E] outline-none focus:border-[#9B72F5] placeholder:text-[#C4B0F7]"
                                         disabled={state.saving}
                                     />
-                                    <button
-                                        onClick={() =>
-                                            handleSaveSubject(subjectId)
-                                        }
-                                        disabled={state.saving}
-                                        className="shrink-0 bg-[#1A1A2E] text-white text-xs font-bold rounded-xl px-4 py-2.5 hover:bg-[#2d2d4e] transition-colors disabled:opacity-50"
-                                    >
-                                        {state.saving ? "…" : "Save"}
-                                    </button>
+                                    <div className="flex gap-2 shrink-0">
+                                        <button
+                                            onClick={() =>
+                                                handleSaveSubject(subjectId)
+                                            }
+                                            disabled={state.saving}
+                                            className="bg-[#1A1A2E] text-white text-xs font-bold rounded-xl px-4 py-2.5 hover:bg-[#2d2d4e] transition-colors disabled:opacity-50"
+                                        >
+                                            {state.saving ? "…" : "Save"}
+                                        </button>
+
+                                        <button
+                                            onClick={() =>
+                                                handleDeleteSubject(subjectId)
+                                            }
+                                            disabled={
+                                                deleteSubjectMutation.isPending
+                                            }
+                                            className="bg-[#FEF0F0] text-[#C0392B] text-xs font-bold rounded-xl px-3 py-2.5 border border-[#FDDCDC] hover:bg-[#fde2e2] transition-colors disabled:opacity-50"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Per-subject feedback */}
@@ -385,6 +539,69 @@ const EditSemesterPage = () => {
                         ))}
                     </div>
                 )}
+                {/* ── New subjects (add mode) ── */}
+                {newSubjects.length > 0 && (
+                    <div className="flex flex-col gap-2 mt-3">
+                        {newSubjects.map((s, i) => (
+                            <div key={s.id} className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-[#C4B0F7] w-5 text-center shrink-0">
+                                    +
+                                </span>
+                                <input
+                                    type="text"
+                                    value={s.name}
+                                    onChange={(e) =>
+                                        updateNewSubjectName(
+                                            s.id,
+                                            e.target.value,
+                                        )
+                                    }
+                                    onKeyDown={(e) =>
+                                        e.key === "Enter" &&
+                                        handleSaveNewSubject(s.id)
+                                    }
+                                    placeholder="Subject name"
+                                    className="flex-1 bg-[#F5F0FF] border border-[#E2DBF0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1A1A2E] outline-none focus:border-[#9B72F5] placeholder:text-[#C4B0F7]"
+                                    disabled={s.saving}
+                                />
+                                <div className="flex gap-2 shrink-0">
+                                    <button
+                                        onClick={() =>
+                                            handleSaveNewSubject(s.id)
+                                        }
+                                        disabled={s.saving}
+                                        className="bg-[#1A1A2E] text-white text-xs font-bold rounded-xl px-4 py-2.5 disabled:opacity-50"
+                                    >
+                                        {s.saving ? "…" : "Save"}
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            removeNewSubjectRow(s.id)
+                                        }
+                                        disabled={s.saving}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#FEF0F0] text-[#E57373] hover:bg-[#FDDCDC] transition-colors shrink-0 disabled:opacity-50"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                {s.error && (
+                                    <p className="text-xs font-semibold text-[#C0392B] mt-1.5 pl-7">
+                                        {s.error}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+                <button
+                    onClick={addSubjectRow}
+                    disabled={addSubjectMutation.isPending}
+                    className="w-full border border-dashed border-[#D0C4F0] rounded-xl py-2.5 text-sm font-semibold text-[#8070AA] hover:bg-[#F5F0FF] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 mt-3"
+                >
+                    <span className="text-base leading-none">+</span>
+                    Add subject
+                </button>
             </div>
 
             {/* Back */}

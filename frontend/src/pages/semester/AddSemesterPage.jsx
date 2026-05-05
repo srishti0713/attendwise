@@ -5,7 +5,7 @@ import Button from "../../components/buttons/Button.jsx";
 import { postSemester } from "../../api/semester.api.js";
 import { addSubject } from "../../api/subject.api.js";
 
-// ── Step indicator ────────────────────────────────────────────────────────────
+//  Step indicator
 const StepIndicator = ({ current }) => (
     <div className="flex items-center gap-2 mb-6">
         {[1, 2].map((step) => {
@@ -42,7 +42,7 @@ const StepIndicator = ({ current }) => (
     </div>
 );
 
-// ── Error banner ──────────────────────────────────────────────────────────────
+//  Error banner
 const ErrorBanner = ({ message }) =>
     message ? (
         <div className="bg-[#FEF0F0] border border-[#FDDCDC] rounded-2xl px-5 py-3 mb-3 flex items-center gap-3">
@@ -51,7 +51,7 @@ const ErrorBanner = ({ message }) =>
         </div>
     ) : null;
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+//  Main page
 const AddSemesterPage = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -67,7 +67,7 @@ const AddSemesterPage = () => {
     const [subjects, setSubjects] = useState([{ id: 1, name: "" }]);
     const counterRef = useRef(1);
 
-    // ── Subject helpers ───────────────────────────────────────────────────────
+    //  Subject helpers
 
     const addSubjectRow = () => {
         counterRef.current += 1;
@@ -84,7 +84,7 @@ const AddSemesterPage = () => {
         );
     };
 
-    // ── Mutations ─────────────────────────────────────────────────────────────
+    //  Mutations
 
     const semesterMutation = useMutation({
         mutationFn: postSemester,
@@ -99,27 +99,25 @@ const AddSemesterPage = () => {
         mutationFn: ({ formData, semesterId }) =>
             addSubject(formData, semesterId),
         onError: (err) => {
-            setError(
-                err?.response?.data?.message || "Failed to add a subject",
-            );
+            setError(err?.response?.data?.message || "Failed to add a subject");
         },
     });
 
-    // ── Step 1: Create semester ───────────────────────────────────────────────
+    //  Step 1: Create semester
 
     const handleCreateSemester = async () => {
-    setError("");
-    try {
-        const semester = await semesterMutation.mutateAsync({
-            semesterName,
-            isCurrent, 
-        });
-        setSemesterId(semester._id);
-        setStep(2);
-    } catch {}
-};
+        setError("");
+        try {
+            const semester = await semesterMutation.mutateAsync({
+                semesterName,
+                isCurrent,
+            });
+            setSemesterId(semester._id);
+            setStep(2);
+        } catch {}
+    };
 
-    // ── Step 2: Add subjects then navigate ────────────────────────────────────
+    //  Step 2: Add subjects then navigate
 
     const handleAddSubjects = async () => {
         setError("");
@@ -150,7 +148,7 @@ const AddSemesterPage = () => {
         navigate("/");
     };
 
-    // ── Render ────────────────────────────────────────────────────────────────
+    //  Render
 
     return (
         <div className="w-full max-w-lg mx-auto pb-24">
@@ -304,17 +302,13 @@ const AddSemesterPage = () => {
                                             }
                                             placeholder="Subject name"
                                             className="flex-1 bg-[#F5F0FF] border border-[#E2DBF0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1A1A2E] outline-none focus:border-[#9B72F5] placeholder:text-[#C4B0F7]"
-                                            disabled={
-                                                subjectMutation.isPending
-                                            }
+                                            disabled={subjectMutation.isPending}
                                         />
                                         <button
                                             onClick={() =>
                                                 removeSubjectRow(s.id)
                                             }
-                                            disabled={
-                                                subjectMutation.isPending
-                                            }
+                                            disabled={subjectMutation.isPending}
                                             className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#FEF0F0] text-[#E57373] hover:bg-[#FDDCDC] transition-colors shrink-0 disabled:opacity-50"
                                         >
                                             ✕

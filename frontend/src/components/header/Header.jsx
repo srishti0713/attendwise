@@ -14,19 +14,19 @@ const Header = () => {
                     >
                         {import.meta.env.VITE_APP_NAME}
                     </h1>
-                    <div className = "flex gap-4 ml-4">
-                    <Button
-                        className="bg-[#E8E0F8] text-[#6B52B5] border-none rounded-full px-4 text-sm font-semibold hover:bg-[#D6CBFA]"
-                        onClick={() => navigate("/setup-semester")}
-                    >
-                        <Plus size={18} className="" />
-                    </Button>
-                    <Button
-                        className="bg-[#E8E0F8] text-[#6B52B5] border-none rounded-full px-4 text-sm font-semibold hover:bg-[#D6CBFA]"
-                        onClick={() => navigate("/profile")}
-                    >
-                        Profile
-                    </Button>
+                    <div className="flex gap-4 ml-4">
+                        <Button
+                            className="bg-[#E8E0F8] text-[#6B52B5] border-none rounded-full px-4 text-sm font-semibold hover:bg-[#D6CBFA]"
+                            onClick={() => navigate("/setup-semester")}
+                        >
+                            <Plus size={18} className="" />
+                        </Button>
+                        <Button
+                            className="bg-[#E8E0F8] text-[#6B52B5] border-none rounded-full px-4 text-sm font-semibold hover:bg-[#D6CBFA]"
+                            onClick={() => navigate("/profile")}
+                        >
+                            Profile
+                        </Button>
                     </div>
                 </div>
             </div>

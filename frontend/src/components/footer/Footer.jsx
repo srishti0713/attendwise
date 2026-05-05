@@ -24,19 +24,15 @@ const Footer = () => {
                         onClick={() => navigate(route)}
                         className="flex flex-col items-center gap-1 border-none bg-transparent cursor-pointer"
                     >
-                        
-                            <div
-                                className={`px-6 py-3 rounded-full flex items-center justify-center transition-all ${
-                                    isActive
-                                        ? "bg-[#1A1A2E] text-white"
-                                        : "bg-[#D6CBFA] text-[#4A20C4]"
-                                }`}
-                            >
-                                {icon}
-                            </div>
-                        
-                           
-                       
+                        <div
+                            className={`px-6 py-3 rounded-full flex items-center justify-center transition-all ${
+                                isActive
+                                    ? "bg-[#1A1A2E] text-white"
+                                    : "bg-[#D6CBFA] text-[#4A20C4]"
+                            }`}
+                        >
+                            {icon}
+                        </div>
                     </button>
                 );
             })}

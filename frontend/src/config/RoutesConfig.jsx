@@ -63,5 +63,4 @@ export const routes = [
         protected: true,
         publicOnly: false,
     },
-    
 ];
