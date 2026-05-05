@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 
 export const addSemester = async (req, res) => {
     try {
-        let { semesterName } = req.body;
+        let { semesterName, isCurrent } = req.body;
 
         // Sanitization
         semesterName = semesterName?.trim();
@@ -27,6 +27,12 @@ export const addSemester = async (req, res) => {
                 message: `Semester name must be between ${MIN_TITLE_LENGTH} and ${MAX_TITLE_LENGTH} characters`,
             });
 
+            
+
+        if (typeof isCurrent !== "boolean") {
+            isCurrent = false;
+        }
+
         const user = await User.findById(req.user._id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -42,22 +48,23 @@ export const addSemester = async (req, res) => {
         const semester = await Semester.create({
             userId: req.user._id,
             semesterName,
+            isCurrent,
         });
 
-        // unset previous
-        await Semester.updateMany(
-            { userId: req.user._id },
-            { isCurrent: false },
-        );
+        if (isCurrent === true || user.semesters.length === 0) {
+            // Unset all previous semesters
+            await Semester.updateMany(
+                { userId: req.user._id, _id: { $ne: semester._id } }, // exclude the new one
+                { isCurrent: false },
+            );
 
-        semester.isCurrent = true;
+            semester.isCurrent = true;
+            await semester.save(); // Save the updated semester
+        }
 
-        // Push semester in user's semesters
         await User.findByIdAndUpdate(req.user._id, {
             $push: { semesters: semester._id },
         });
-
-        if (!user) return res.status(404).json({ message: "User not found" });
 
         return res.status(201).json(semester);
     } catch (error) {
@@ -91,7 +98,7 @@ export const getSemester = async (req, res) => {
 };
 
 export const getSemesters = async (req, res) => {
-    console.log("REQ.USER:", req.user);
+    
 
     try {
         const userId = req.user._id;

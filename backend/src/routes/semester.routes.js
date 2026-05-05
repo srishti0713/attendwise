@@ -7,13 +7,12 @@ import {
     getCurrentSemester,
 } from "../controllers/semester.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
-import { upload } from "../middleware/multer.middleware.js";
 import express from "express";
 
 const router = express.Router();
 
 // POST
-router.post("/create-semester", upload.single(), verifyJWT, addSemester);
+router.post("/create-semester", verifyJWT, addSemester);
 
 // GET
 router.get("/get-semesters", verifyJWT, getSemesters);

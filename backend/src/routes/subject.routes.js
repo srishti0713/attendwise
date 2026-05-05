@@ -6,12 +6,13 @@ import {
     deleteSubject,
 } from "../controllers/subject.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
+import { upload } from "../middleware/multer.middleware.js";
 import express from "express";
 
 const router = express.Router();
 
 // POST
-router.post("/:semesterId", verifyJWT, addSubject);
+router.post("/:semesterId", upload.single(), verifyJWT, addSubject);
 
 // GET
 router.get("/get-subject/:subjectId", verifyJWT, getSubject);

@@ -6,6 +6,7 @@ import EditProfilePage from "../pages/profile/EditProfilePage";
 import ProfilePage from "../pages/profile/ProfilePage";
 import SubjectsDisplay from "../pages/subjects/SubjectsDisplay";
 import AddSemesterPage from "../pages/semester/AddSemesterPage";
+import EditSemesterPage from "../pages/semester/EditSemesterPage";
 
 export const routes = [
     {
@@ -56,4 +57,11 @@ export const routes = [
         protected: true,
         publicOnly: false,
     },
+    {
+        path: "/semesters/:semesterId/edit",
+        element: <EditSemesterPage />,
+        protected: true,
+        publicOnly: false,
+    },
+    
 ];

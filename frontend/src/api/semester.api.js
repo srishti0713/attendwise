@@ -1,7 +1,9 @@
 import { api } from "./axios";
 
-export const postSemester = async (FormData) => {
-    const { data } = await api.post("/semesters/create-semester", FormData);
+export const postSemester = async (payload) => {
+    const { data } = await api.post("/semesters/create-semester", payload, {
+        headers: { "Content-Type": "application/json" },
+    });
     return data;
 };
 
@@ -15,8 +17,10 @@ export const getSemesters = async () => {
     return data;
 };
 
-export const editSemester = async (semesterId, FormData) => {
-    const { data } = await api.patch(`/semesters/${semesterId}`, FormData);
+export const editSemester = async (semesterId, payload) => {
+    const { data } = await api.patch(`/semesters/${semesterId}`, payload, {
+        headers: { "Content-Type": "application/json" },
+    });
     return data;
 };
 

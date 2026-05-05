@@ -46,7 +46,7 @@ const StepIndicator = ({ current }) => (
 const ErrorBanner = ({ message }) =>
     message ? (
         <div className="bg-[#FEF0F0] border border-[#FDDCDC] rounded-2xl px-5 py-3 mb-3 flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-[#E57373] flex-shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[#E57373] shrink-0" />
             <p className="text-sm font-semibold text-[#C0392B]">{message}</p>
         </div>
     ) : null;
@@ -60,6 +60,7 @@ const AddSemesterPage = () => {
     const [step, setStep] = useState(1);
     const [semesterName, setSemesterName] = useState("");
     const [semesterId, setSemesterId] = useState(null);
+    const [isCurrent, setIsCurrent] = useState(true);
     const [error, setError] = useState("");
 
     // Step 2 state
@@ -107,19 +108,16 @@ const AddSemesterPage = () => {
     // ── Step 1: Create semester ───────────────────────────────────────────────
 
     const handleCreateSemester = async () => {
-        setError("");
-
-        const data = new FormData();
-        data.append("semesterName", semesterName);
-
-        try {
-            const semester = await semesterMutation.mutateAsync(data);
-            setSemesterId(semester._id);
-            setStep(2);
-        } catch {
-            // error already handled in onError
-        }
-    };
+    setError("");
+    try {
+        const semester = await semesterMutation.mutateAsync({
+            semesterName,
+            isCurrent, 
+        });
+        setSemesterId(semester._id);
+        setStep(2);
+    } catch {}
+};
 
     // ── Step 2: Add subjects then navigate ────────────────────────────────────
 
@@ -179,24 +177,73 @@ const AddSemesterPage = () => {
                         <p className="text-[11px] font-bold tracking-widest uppercase text-[#8070AA] mb-4">
                             Semester info
                         </p>
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-semibold text-[#6B52B5]">
-                                Semester name
+                        <div className="flex flex-col gap-3">
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-semibold text-[#6B52B5]">
+                                    Semester name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={semesterName}
+                                    onChange={(e) =>
+                                        setSemesterName(e.target.value)
+                                    }
+                                    placeholder="e.g. Fall 2025, Semester 3…"
+                                    className="bg-[#F5F0FF] border border-[#E2DBF0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1A1A2E] outline-none focus:border-[#9B72F5] w-full placeholder:text-[#C4B0F7]"
+                                    disabled={semesterMutation.isPending}
+                                    onKeyDown={(e) =>
+                                        e.key === "Enter" &&
+                                        handleCreateSemester()
+                                    }
+                                    autoFocus
+                                />
+                            </div>
+                            <label
+                                className={`flex items-center gap-3 cursor-pointer select-none ${semesterMutation.isPending ? "opacity-50 pointer-events-none" : ""}`}
+                            >
+                                <div className="relative shrink-0">
+                                    <input
+                                        type="checkbox"
+                                        checked={isCurrent}
+                                        onChange={(e) =>
+                                            setIsCurrent(e.target.checked)
+                                        }
+                                        className="sr-only"
+                                    />
+                                    <div
+                                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+                                            isCurrent
+                                                ? "bg-[#9B72F5] border-[#9B72F5]"
+                                                : "bg-[#F5F0FF] border-[#D0C4F0]"
+                                        }`}
+                                    >
+                                        {isCurrent && (
+                                            <svg
+                                                width="11"
+                                                height="8"
+                                                viewBox="0 0 11 8"
+                                                fill="none"
+                                            >
+                                                <path
+                                                    d="M1 4L4 7L10 1"
+                                                    stroke="white"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
+                                            </svg>
+                                        )}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-[#1A1A2E]">
+                                        Mark as current semester
+                                    </p>
+                                    <p className="text-xs text-[#8070AA]">
+                                        This will be set as your active semester
+                                    </p>
+                                </div>
                             </label>
-                            <input
-                                type="text"
-                                value={semesterName}
-                                onChange={(e) =>
-                                    setSemesterName(e.target.value)
-                                }
-                                placeholder="e.g. Fall 2025, Semester 3…"
-                                className="bg-[#F5F0FF] border border-[#E2DBF0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1A1A2E] outline-none focus:border-[#9B72F5] w-full placeholder:text-[#C4B0F7]"
-                                disabled={semesterMutation.isPending}
-                                onKeyDown={(e) =>
-                                    e.key === "Enter" && handleCreateSemester()
-                                }
-                                autoFocus
-                            />
                         </div>
                     </div>
 
@@ -243,7 +290,7 @@ const AddSemesterPage = () => {
                                         key={s.id}
                                         className="flex items-center gap-2"
                                     >
-                                        <span className="text-xs font-bold text-[#C4B0F7] w-5 text-center flex-shrink-0">
+                                        <span className="text-xs font-bold text-[#C4B0F7] w-5 text-center shrink-0">
                                             {i + 1}
                                         </span>
                                         <input
@@ -268,7 +315,7 @@ const AddSemesterPage = () => {
                                             disabled={
                                                 subjectMutation.isPending
                                             }
-                                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#FEF0F0] text-[#E57373] hover:bg-[#FDDCDC] transition-colors flex-shrink-0 disabled:opacity-50"
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#FEF0F0] text-[#E57373] hover:bg-[#FDDCDC] transition-colors shrink-0 disabled:opacity-50"
                                         >
                                             ✕
                                         </button>
