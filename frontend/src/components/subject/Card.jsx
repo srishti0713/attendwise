@@ -1,6 +1,8 @@
 import Button from "../buttons/Button.jsx";
 import { Check, X, Ban } from "lucide-react";
 import AttendanceCircle from "./AttendanceCircle.jsx";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateSubject } from "../../api/subject.api.js";
 
 const CARD_STYLES = {
     safe: {
@@ -26,8 +28,22 @@ const CARD_STYLES = {
     },
 };
 
-const Card = ({ subject, percentage, status, classesToSafe, classesToGoal, canMiss }) => {
+const Card = ({ subject, percentage, status, classesToSafe, classesToGoal, canMiss, subjectId, semesterId }) => {
     const styles = CARD_STYLES[status] ?? CARD_STYLES.danger;
+
+    const queryClient = useQueryClient();
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: (attendanceStatus) =>
+            updateSubject(subjectId, {
+                date: new Date().toISOString(),
+                status: attendanceStatus,
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["timetable" , semesterId] });
+        },
+    });
+
 
     return (
         <div className={`${styles.card} rounded-2xl px-8 py-4 w-full overflow-hidden`}>
@@ -62,18 +78,24 @@ const Card = ({ subject, percentage, status, classesToSafe, classesToGoal, canMi
                     <Button
                         className={`btn-sm border-[#6639ed] shadow-sm rounded-xl w-9 h-9 ${styles.ban}`}
                         variant=""
+                        onClick={() => mutate("off")}
+                        disabled={isPending}
                     >
                         <Ban size={16} />
                     </Button>
                     <Button
                         className={`btn-sm border-[#45685a] shadow-sm rounded-xl w-9 h-9 ${styles.check}`}
                         variant=""
+                        onClick={() => mutate("attended")}
+                        disabled={isPending}
                     >
                         <Check size={16} />
                     </Button>
                     <Button
                         className={`btn-sm border-[#893e53] shadow-sm rounded-xl w-9 h-9 ${styles.x}`}
                         variant=""
+                        onClick={() => mutate("missed")}
+                        disabled={isPending}
                     >
                         <X size={16} />
                     </Button>

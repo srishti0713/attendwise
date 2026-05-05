@@ -4,7 +4,7 @@ import useTodaySubjects from "../../hooks/useTodaySubjects.js";
 import { useSearchParams } from "react-router-dom";
 
 const HomePage = () => {
-    const { todaySubjects, isLoading } = useTodaySubjects();
+    const { todaySubjects, isLoading, semester } = useTodaySubjects();
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get("tab") || "attendance";
 
@@ -52,12 +52,14 @@ const HomePage = () => {
                         todaySubjects.map((subject) => (
                             <Card
                                 key={subject._id}
+                                subjectId={subject._id}
                                 subject={subject.subjectName}
                                 percentage={subject.attendancePercentage}
                                 status={subject.status}
                                 classesToSafe={subject.classesToSafeZone}
                                 classesToGoal={subject.classesToGoal}
                                 canMiss={subject.canMiss}
+                                 semesterId={semester?._id}
                             />
                         ))
                     )}
