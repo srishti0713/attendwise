@@ -27,8 +27,6 @@ export const addSemester = async (req, res) => {
                 message: `Semester name must be between ${MIN_TITLE_LENGTH} and ${MAX_TITLE_LENGTH} characters`,
             });
 
-            
-
         if (typeof isCurrent !== "boolean") {
             isCurrent = false;
         }
@@ -98,8 +96,6 @@ export const getSemester = async (req, res) => {
 };
 
 export const getSemesters = async (req, res) => {
-    
-
     try {
         const userId = req.user._id;
 

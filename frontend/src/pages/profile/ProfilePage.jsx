@@ -66,7 +66,7 @@ const ProfilePage = () => {
 
     return (
         <>
-        {/* Confirmation Modal before logout and delete account actions */}
+            {/* Confirmation Modal before logout and delete account actions */}
 
             {/* Logout Modal */}
             {modal === "logout" && (
@@ -160,7 +160,7 @@ const ProfilePage = () => {
                             </span>
                             <span className="text-xs font-medium text-[#2E8B57]">
                                 goal
-                            </span>   
+                            </span>
                         </div>
                     </div>
                 </div>

@@ -59,7 +59,7 @@ const HomePage = () => {
                                 classesToSafe={subject.classesToSafeZone}
                                 classesToGoal={subject.classesToGoal}
                                 canMiss={subject.canMiss}
-                                 semesterId={semester?._id}
+                                semesterId={semester?._id}
                             />
                         ))
                     )}

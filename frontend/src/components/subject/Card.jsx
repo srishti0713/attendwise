@@ -36,7 +36,7 @@ const Card = ({
     classesToGoal,
     canMiss,
     semesterId,
-    subjectId
+    subjectId,
 }) => {
     const styles = CARD_STYLES[status] ?? CARD_STYLES.danger;
 
@@ -49,10 +49,11 @@ const Card = ({
                 status: attendanceStatus,
             }),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["timetable" , semesterId] });
+            queryClient.invalidateQueries({
+                queryKey: ["timetable", semesterId],
+            });
         },
     });
-
 
     return (
         <div
