@@ -5,6 +5,7 @@ import HomePage from "../pages/home/HomePage";
 import EditProfilePage from "../pages/profile/EditProfilePage";
 import ProfilePage from "../pages/profile/ProfilePage";
 import SubjectsDisplay from "../pages/subjects/SubjectsDisplay";
+import TimetablePage from "../pages/timetable/Timetable";
 import AddSemesterPage from "../pages/semester/AddSemesterPage";
 import EditSemesterPage from "../pages/semester/EditSemesterPage";
 
@@ -48,6 +49,12 @@ export const routes = [
     {
         path: "/profile/edit",
         element: <EditProfilePage />,
+        protected: true,
+        publicOnly: false,
+    },
+    {
+        path: "/timetable",
+        element: <TimetablePage />,
         protected: true,
         publicOnly: false,
     },

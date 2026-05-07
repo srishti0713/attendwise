@@ -14,6 +14,7 @@ const ProfilePage = () => {
     const queryClient = useQueryClient();
     const [modal, setModal] = useState(null); // "logout" | "delete" | null
 
+    // Name separation for display
     const getInitials = (name) => {
         if (!name) return "?";
         return name
@@ -24,6 +25,7 @@ const ProfilePage = () => {
             .slice(0, 2);
     };
 
+    // Logout functionality
     const handleLogout = async () => {
         try {
             await logout();
@@ -36,6 +38,7 @@ const ProfilePage = () => {
         }
     };
 
+    // Account delete functionality
     const handleDelete = async () => {
         try {
             await deleteUser();
@@ -63,6 +66,9 @@ const ProfilePage = () => {
 
     return (
         <>
+            {/* Confirmation Modal before logout and delete account actions */}
+
+            {/* Logout Modal */}
             {modal === "logout" && (
                 <ConfirmModal
                     title="Log out?"
@@ -74,6 +80,7 @@ const ProfilePage = () => {
                 />
             )}
 
+            {/* Delete Modal */}
             {modal === "delete" && (
                 <ConfirmModal
                     variant="danger"
@@ -133,32 +140,32 @@ const ProfilePage = () => {
                         Attendance targets
                     </p>
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-[#B8E8CC] border border-[#8FD4AA] rounded-2xl p-4 flex flex-col items-center gap-1">
-                            <span className="text-[10px] font-bold tracking-widest uppercase text-[#1A5C38]">
+                        <div className="bg-[#F5E6A3]  border border-[#E8CC6A] rounded-2xl p-4 flex flex-col items-center gap-1">
+                            <span className="text-[10px] font-bold tracking-widest uppercase text-[#7A4A00]">
                                 Safe zone
                             </span>
-                            <span className="font-playfair text-4xl font-bold text-[#2E8B57] leading-none">
+                            <span className="font-playfair text-4xl font-bold  leading-none text-[#7A4A00]">
                                 {user.safePercentage}%
                             </span>
-                            <span className="text-xs font-medium text-[#2E8B57]">
+                            <span className="text-xs font-medium text-[#7A4A00]">
                                 minimum
                             </span>
                         </div>
-                        <div className="bg-[#D6CBFA] border border-[#C4B0F7] rounded-2xl p-4 flex flex-col items-center gap-1">
-                            <span className="text-[10px] font-bold tracking-widest uppercase text-[#4A20C4]">
+                        <div className="bg-[#B8E8CC] border border-[#8FD4AA] rounded-2xl p-4 flex flex-col items-center gap-1">
+                            <span className="text-[10px] font-bold tracking-widest uppercase text-[#2E8B57]">
                                 Target
                             </span>
-                            <span className="font-playfair text-4xl font-bold text-[#6B52B5] leading-none">
+                            <span className="font-playfair text-4xl font-bold text-[#2E8B57] leading-none">
                                 {user.targetPercentage}%
                             </span>
-                            <span className="text-xs font-medium text-[#8070AA]">
+                            <span className="text-xs font-medium text-[#2E8B57]">
                                 goal
                             </span>
                         </div>
                     </div>
                 </div>
 
-                {/* Actions */}
+                {/* Action Buttons */}
                 <div className="bg-white border border-[#E2DBF0] rounded-2xl p-5">
                     <p className="text-[11px] font-bold tracking-widest uppercase text-[#8070AA] mb-4">
                         Actions
@@ -172,7 +179,7 @@ const ProfilePage = () => {
                         </Button>
                         <Button
                             onClick={() => setModal("logout")}
-                            className="bg-[#F5E6A3] text-[#7A4A00] border border-[#E8CC6A] rounded-xl py-3 text-sm font-bold flex-1"
+                            className="text-[#4A20C4] bg-[#D6CBFA] border border-[#C4B0F7] rounded-xl py-3 text-sm font-bold flex-1"
                         >
                             Log out
                         </Button>

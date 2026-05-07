@@ -34,6 +34,7 @@ const EditProfilePage = () => {
         },
     });
 
+    // Saving name and email only
     const handleSaveInfo = (e) => {
         e.preventDefault();
         setError("");
@@ -44,12 +45,14 @@ const EditProfilePage = () => {
         updateMutation.mutate(data);
     };
 
+    // Saving new password
     const handleSavePassword = () => {
         if (!oldPassword || !newPassword || !confirmPassword) {
             setError("All password fields are required");
             return;
         }
 
+        // Confirm new password and confirm password are same
         if (newPassword !== confirmPassword) {
             setError("Passwords do not match");
             return;
@@ -58,10 +61,12 @@ const EditProfilePage = () => {
         updateMutation.mutate({ oldPassword, newPassword, confirmPassword });
     };
 
+    // Saving safe and target percentages
     const handleSaveTargets = () => {
         updateMutation.mutate({ safePercentage, targetPercentage });
     };
 
+    // Make safe percent same as target percent
     const handleMatchTarget = () => {
         setSafePercentage(targetPercentage);
     };
@@ -84,6 +89,7 @@ const EditProfilePage = () => {
                     <p className="text-[11px] font-bold tracking-widest uppercase text-[#8070AA] mb-4">
                         Personal info
                     </p>
+                    {/* Name */}
                     <div className="flex flex-col gap-3 mb-4">
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-[#6B52B5]">
@@ -96,6 +102,8 @@ const EditProfilePage = () => {
                                 className="bg-[#F5F0FF] border border-[#E2DBF0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1A1A2E] outline-none focus:border-[#9B72F5] w-full"
                             />
                         </div>
+
+                        {/* Email */}
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-[#6B52B5]">
                                 Email address
@@ -113,7 +121,6 @@ const EditProfilePage = () => {
                         type="submit"
                         className="bg-[#1A1A2E] text-white border-none rounded-xl py-3 text-sm font-bold"
                         fullWidth
-                        // disabled={isPending}
                     >
                         Save info
                     </Button>
@@ -125,6 +132,7 @@ const EditProfilePage = () => {
                 <p className="text-[11px] font-bold tracking-widest uppercase text-[#8070AA] mb-4">
                     Change password
                 </p>
+                {/* Current Password */}
                 <div className="flex flex-col gap-3 mb-4">
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-[#6B52B5]">
@@ -138,6 +146,8 @@ const EditProfilePage = () => {
                             className="bg-[#F5F0FF] border border-[#E2DBF0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1A1A2E] outline-none focus:border-[#9B72F5] w-full placeholder:text-[#C4B0F7]"
                         />
                     </div>
+
+                    {/* New Password */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-[#6B52B5]">
                             New password
@@ -150,6 +160,8 @@ const EditProfilePage = () => {
                             className="bg-[#F5F0FF] border border-[#E2DBF0] rounded-xl px-4 py-2.5 text-sm font-medium text-[#1A1A2E] outline-none focus:border-[#9B72F5] w-full placeholder:text-[#C4B0F7]"
                         />
                     </div>
+
+                    {/* Confirm new password */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-[#6B52B5]">
                             Confirm new password
@@ -168,7 +180,6 @@ const EditProfilePage = () => {
                     onClick={handleSavePassword}
                     className="bg-[#1A1A2E] text-white border-none rounded-xl py-3 text-sm font-bold"
                     fullWidth
-                    //disabled={isPending}
                 >
                     Update password
                 </Button>
@@ -179,6 +190,8 @@ const EditProfilePage = () => {
                 <p className="text-[11px] font-bold tracking-widest uppercase text-[#8070AA] mb-4">
                     Attendance targets
                 </p>
+
+                {/* Safe percentage */}
                 <div className="grid grid-cols-2 gap-3 mb-3">
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-[#6B52B5]">
@@ -192,9 +205,11 @@ const EditProfilePage = () => {
                             }
                             min="1"
                             max="100"
-                            className="bg-[#B8E8CC] border border-[#8FD4AA] rounded-xl px-4 py-2.5 text-lg font-playfair font-bold text-[#2E8B57] outline-none focus:border-[#2E8B57] w-full text-center"
+                            className=" bg-[#F5E6A3]  border border-[#E8CC6A] rounded-xl px-4 py-2.5 text-lg font-playfair font-bold text-[#7A4A00] outline-none focus:border-[#E8CC6A] w-full text-center"
                         />
                     </div>
+
+                    {/* Target Percentage */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-[#6B52B5]">
                             Target %
@@ -207,10 +222,12 @@ const EditProfilePage = () => {
                             }
                             min="1"
                             max="100"
-                            className="bg-[#D6CBFA] border border-[#C4B0F7] rounded-xl px-4 py-2.5 text-lg font-playfair font-bold text-[#4A20C4] outline-none focus:border-[#9B72F5] w-full text-center"
+                            className="bg-[#B8E8CC] border border-[#8FD4AA] rounded-xl px-4 py-2.5 text-lg font-playfair font-bold text-[#2E8B57] outline-none focus:border-[#2E8B57] w-full text-center"
                         />
                     </div>
                 </div>
+
+                {/* Set safe percent same as target percent */}
                 <Button
                     onClick={handleMatchTarget}
                     className="bg-[#E8E0F8] text-[#4A20C4] border-none rounded-xl py-2.5 text-xs font-bold mb-3"
