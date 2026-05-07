@@ -86,7 +86,7 @@ const SubjectCard = ({
     isDragging,
 }) => (
     <div
-        className={`relative border rounded-2xl p-1 sm:px-8 sm:py-4 text-center text-[9px] sm:text-[11px] font-semibold leading-tight break-words select-none
+        className={`relative border rounded-2xl p-1 sm:px-8 sm:py-4 text-center text-[9px] sm:text-[11px] font-semibold leading-tight wrap-break-word select-none
             ${colorClass}
             ${isDragging ? "opacity-50 scale-95" : ""}
             ${isEditMode ? "cursor-grab active:cursor-grabbing" : ""}
