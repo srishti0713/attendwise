@@ -35,6 +35,8 @@ const Card = ({
     classesToSafe,
     classesToGoal,
     canMiss,
+    semesterId,
+    subjectId
 }) => {
     const styles = CARD_STYLES[status] ?? CARD_STYLES.danger;
 
