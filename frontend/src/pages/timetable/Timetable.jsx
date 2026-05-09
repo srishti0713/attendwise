@@ -5,6 +5,7 @@ import useSubjects from "../../hooks/useSubjects";
 import { getTimetable, editTimetable } from "../../api/timetable.api";
 import ConfirmModal from "../../components/modal/ConfirmModal";
 import Button from "../../components/buttons/Button";
+import { Plus } from "lucide-react";
 
 const DAYS = [
     "Monday",
@@ -488,6 +489,12 @@ const TimetablePage = () => {
                         <p className="text-xs text-[#8070AA] font-medium text-center py-6">
                             You have not added a timetable yet.
                         </p>
+                        <Button
+                            className="bg-[#E8E0F8] text-[#6B52B5] border-none rounded-xl px-4 text-sm font-semibold hover:bg-[#D6CBFA]"
+                            onClick={() => navigate("/setup-semester")}
+                        >
+                            <Plus size={18} className="" />
+                        </Button>
                     </div>
                 ) : (
                     <div className="bg-white border border-[#E2DBF0] rounded-2xl p-4 sm:p-5">
