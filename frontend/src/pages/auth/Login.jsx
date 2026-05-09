@@ -24,77 +24,100 @@ const Login = () => {
 
     return (
         <div
-            className="relative min-h-screen flex items-start justify-center pt-16 overflow-x-hidden font-[Outfit] 
-      bg-[radial-gradient(ellipse_at_50%_10%,#1c3d7a_0%,#0e2050_30%,#06112b_65%,#020810_100%)]"
+            className="min-h-screen flex items-center justify-center px-6"
+            style={{
+                background:
+                    "linear-gradient(135deg, #C9A96E 0%, #B8A9C9 40%, #9B9EC8 70%, #8B9DC8 100%)",
+            }}
         >
-            {/* Background stars */}
             <div
-                className="pointer-events-none fixed inset-0 
-        bg-[radial-gradient(1px_1px_at_15%_25%,rgba(255,255,255,0.35)_0%,transparent_100%),
-             radial-gradient(1px_1px_at_75%_15%,rgba(255,255,255,0.25)_0%,transparent_100%),
-             radial-gradient(1px_1px_at_40%_60%,rgba(255,255,255,0.2)_0%,transparent_100%),
-             radial-gradient(1px_1px_at_85%_75%,rgba(255,255,255,0.3)_0%,transparent_100%)]"
-            ></div>
+                className="w-full max-w-sm rounded-3xl p-8 flex flex-col gap-5"
+                style={{
+                    background: "rgba(255,255,255,0.25)",
+                    backdropFilter: "blur(16px)",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                }}
+            >
+                {/* Header */}
+                <div className="text-center mb-2">
+                    <h1 className="font-playfair text-3xl font-bold text-[#1A1A2E] mb-1">
+                        AttendWise
+                    </h1>
+                    <p className="text-sm text-[#2D2D4A] opacity-60 font-medium">
+                        Welcome back!
+                    </p>
+                </div>
 
-            <div className="relative z-10 w-full max-w-sm px-6 pb-10 text-center">
-                <h2 className="text-white text-2xl font-extrabold mb-5">
-                    {" "}
-                    Login to {import.meta.env.VITE_APP_NAME}
-                </h2>
-
-                <div className="w-full h-px bg-white/10 mb-5"></div>
-
-                <p className="text-[#b0bfd8] text-sm mb-6">
-                    New user?{" "}
-                    <Link to="/register" className="text-[#4d8eff]">
-                        Create account →
-                    </Link>
-                </p>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <input
                         type="email"
-                        placeholder="Enter your email"
-                        className="w-full p-4 mb-3 rounded-lg border border-[rgba(100,140,220,0.25)]
-          bg-[rgba(10,30,80,0.5)] text-[#c8d8f0] text-sm outline-none
-          placeholder:text-[#5a7aaa] focus:border-[#4d8eff]"
+                        placeholder="Email address"
                         onChange={(e) => setEmail(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl text-sm text-[#1A1A2E] outline-none placeholder:text-[#1A1A2E]/40 font-medium"
+                        style={{
+                            background: "rgba(255,255,255,0.35)",
+                            border: "1px solid rgba(255,255,255,0.5)",
+                        }}
                     />
 
                     <input
                         type="password"
-                        placeholder="Enter your password"
-                        className="w-full p-4 mb-3 rounded-lg border border-[rgba(100,140,220,0.25)]
-          bg-[rgba(10,30,80,0.5)] text-[#c8d8f0] text-sm outline-none
-          placeholder:text-[#5a7aaa] focus:border-[#4d8eff]"
+                        placeholder="Password"
                         onChange={(e) => setPassword(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl text-sm text-[#1A1A2E] outline-none placeholder:text-[#1A1A2E]/40 font-medium"
+                        style={{
+                            background: "rgba(255,255,255,0.35)",
+                            border: "1px solid rgba(255,255,255,0.5)",
+                        }}
                     />
 
-                    <div className="text-right mb-4">
+                    <div className="text-right -mt-1">
                         <Link
                             to="#"
-                            className="text-[#4d8eff] text-xs no-underline"
+                            className="text-xs font-semibold text-[#1A1A2E] opacity-60"
                         >
-                            Forgot Password?
+                            Forgot password?
                         </Link>
                     </div>
 
+                    {/* Error */}
+                    {mutation.isError && (
+                        <p className="text-red-700 text-sm text-center font-medium">
+                            {mutation.error?.response?.data?.message ||
+                                mutation.error?.message ||
+                                "An error occurred"}
+                        </p>
+                    )}
+
                     <button
-                        className="w-full p-4 mt-1 rounded-xl text-white text-base font-bold cursor-pointer
-          bg-[linear-gradient(180deg,#4a7de8_0%,#2a5fd6_100%)]
-          shadow-[0_6px_24px_rgba(42,95,214,0.55)]
-          hover:bg-[linear-gradient(180deg,#5a8df0_0%,#3a6fe0_100%)]"
+                        type="submit"
+                        disabled={mutation.isPending}
+                        className="w-full py-3 rounded-xl text-white text-sm font-bold cursor-pointer border-none"
+                        style={{ background: "#1A1A2E" }}
                     >
-                        Login
+                        {mutation.isPending ? "Signing in..." : "Sign in"}
                     </button>
                 </form>
-                {/* Error */}
-                {mutation.isError && (
-                    <p className="text-error text-sm">
-                        {mutation.error?.response?.data?.message ||
-                            mutation.error?.message ||
-                            "An error occurred"}
-                    </p>
-                )}
+
+                {/* Divider */}
+                <div
+                    className="h-px w-2/3 mx-auto"
+                    style={{
+                        background:
+                            "linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent)",
+                    }}
+                />
+
+                {/* Register link */}
+                <p className="text-center text-sm text-[#2D2D4A] opacity-75">
+                    New here?{" "}
+                    <Link
+                        to="/register"
+                        className="font-semibold text-[#1A1A2E] opacity-100 underline underline-offset-2"
+                    >
+                        Create account →
+                    </Link>
+                </p>
             </div>
         </div>
     );
