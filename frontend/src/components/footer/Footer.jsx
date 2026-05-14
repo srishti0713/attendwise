@@ -10,7 +10,6 @@ const Footer = () => {
     const tabs = [
         { icon: <House size={20} />, route: "/home" },
         { icon: <TextAlignJustify size={20} />, route: "/subjects" },
-        { icon: <CalendarDays size={20} />, route: "/calendar" },
         { icon: <Grid3x3 size={20} />, route: "/timetable" },
     ];
 

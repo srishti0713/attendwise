@@ -5,24 +5,16 @@ import useSubjects from "../../hooks/useSubjects";
 import { getTimetable, editTimetable } from "../../api/timetable.api";
 import ConfirmModal from "../../components/modal/ConfirmModal";
 import Button from "../../components/buttons/Button";
-
-const DAYS = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-];
-
-const DAY_SHORT = {
-    Monday: "Mon",
-    Tuesday: "Tue",
-    Wednesday: "Wed",
-    Thursday: "Thu",
-    Friday: "Fri",
-    Saturday: "Sat",
-};
+import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+    DAYS,
+    DAY_SHORT,
+    SUBJECT_COLORS,
+    buildColorMap,
+} from "../../lib/timetableConfig.js";
+import SubjectCard from "../../components/timetable/SubjectCard";
+import SubjectLegend from "../../components/timetable/SubjectLegend";
 
 const PencilIcon = () => (
     <svg
@@ -42,28 +34,6 @@ const PencilIcon = () => (
     </svg>
 );
 
-const SUBJECT_COLORS = [
-    "bg-[#D6CBFA] border-[#C4B0F7] text-[#3C2A8A]", // lavender — kept
-    "bg-[#F5D6B8] border-[#E8B88F] text-[#7A3A00]", // orange — kept
-    "bg-[#B8D8F5] border-[#8FBDE8] text-[#1A3A6B]", // blue — kept
-    "bg-[#B8EEF0] border-[#7ADDE0] text-[#0A5A5C]", // cyan/teal
-    "bg-[#EDD5C8] border-[#D4A898] text-[#5C2A1A]", // mocha
-    "bg-[#F0B8EE] border-[#E080DC] text-[#5A0A58]", // magenta/pink-purple
-];
-
-const buildColorMap = (subjects) => {
-    const map = new Map();
-    subjects.forEach((subject) => {
-        if (!map.has(subject._id)) {
-            map.set(
-                subject._id,
-                SUBJECT_COLORS[map.size % SUBJECT_COLORS.length],
-            );
-        }
-    });
-    return map;
-};
-
 // Converts populated timetable (objects) to plain id-keyed structure for local state
 const timetableToLocal = (timetable) => {
     const local = {};
@@ -76,39 +46,6 @@ const timetableToLocal = (timetable) => {
     return local;
 };
 
-// SubjectCard
-const SubjectCard = ({
-    subject,
-    colorClass,
-    isEditMode,
-    onDelete,
-    dragHandleProps,
-    isDragging,
-}) => (
-    <div
-        className={`relative border rounded-2xl p-1 sm:px-8 sm:py-4 text-center text-[9px] sm:text-[11px] font-semibold leading-tight wrap-break-word select-none
-            ${colorClass}
-            ${isDragging ? "opacity-50 scale-95" : ""}
-            ${isEditMode ? "cursor-grab active:cursor-grabbing" : ""}
-        `}
-        {...dragHandleProps}
-    >
-        {subject.subjectName}
-        {isEditMode && (
-            <button
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(subject);
-                }}
-                className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#1A1A2E] text-white text-[9px] flex items-center justify-center leading-none z-10"
-            >
-                ✕
-            </button>
-        )}
-    </div>
-);
-
 // DraggableColumn
 const DraggableColumn = ({
     day,
@@ -119,6 +56,7 @@ const DraggableColumn = ({
     onSetActiveDay,
     onDelete,
     onDrop,
+    totalSubjects,
 }) => {
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const draggingIndex = useRef(null);
@@ -188,7 +126,7 @@ const DraggableColumn = ({
             ))}
 
             {/* Add slot — only in edit mode */}
-            {isEditMode && (
+            {isEditMode && subjects.length < totalSubjects && (
                 <button
                     onClick={() => onSetActiveDay(isActive ? null : day)}
                     className={`border rounded-xl text-[10px] sm:text-[11px] font-semibold py-1.5 sm:py-2 w-full transition-colors
@@ -207,6 +145,7 @@ const DraggableColumn = ({
 
 // TimetablePage
 const TimetablePage = () => {
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { data: semester, isLoading: semesterLoading } = useCurrentSemester();
     const semesterId = semester?._id;
@@ -235,11 +174,9 @@ const TimetablePage = () => {
     // Edit state
     const [isEditMode, setIsEditMode] = useState(false);
     const [localTimetable, setLocalTimetable] = useState(null);
-    const [activeDay, setActiveDay] = useState(null); // day with open legend
-    const [deleteTarget, setDeleteTarget] = useState(null); // { subject, day }
+    const [activeDay, setActiveDay] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
-
-    // Mutations
 
     // Save all (reorder + add) — sends each modified day
     const saveMutation = useMutation({
@@ -282,8 +219,6 @@ const TimetablePage = () => {
         },
     });
 
-    // Handlers
-
     const handleEnterEdit = () => {
         if (!timetableData) return;
         setLocalTimetable(timetableToLocal(timetableData.timetable));
@@ -301,7 +236,6 @@ const TimetablePage = () => {
         await saveMutation.mutateAsync().finally(() => setIsSaving(false));
     };
 
-    // Drag-and-drop reorder within a day
     const handleDrop = (day, fromIndex, toIndex) => {
         setLocalTimetable((prev) => {
             const updated = [...prev[day]];
@@ -311,7 +245,6 @@ const TimetablePage = () => {
         });
     };
 
-    // Add subject from legend to active day
     const handleAddSubject = (subject) => {
         if (!activeDay) return;
         const alreadyIn = localTimetable[activeDay].some(
@@ -327,7 +260,6 @@ const TimetablePage = () => {
         }));
     };
 
-    // Confirm delete
     const handleConfirmDelete = () => {
         if (!deleteTarget) return;
         deleteMutation.mutate({
@@ -336,24 +268,15 @@ const TimetablePage = () => {
         });
     };
 
-    // Derived
-
     const colorMap = buildColorMap(subjects);
 
     const hasTimetable = !!timetableData && !timetableError;
 
-    // What to render in the grid — local state in edit mode, server data otherwise
     const displayTimetable = isEditMode
         ? localTimetable
         : hasTimetable
           ? timetableToLocal(timetableData.timetable)
           : null;
-
-    const maxSlots = displayTimetable
-        ? Math.max(...DAYS.map((d) => (displayTimetable[d] || []).length), 0)
-        : 0;
-
-    // Loading / empty states
 
     if (semesterLoading || subjectsLoading || timetableLoading)
         return (
@@ -369,7 +292,6 @@ const TimetablePage = () => {
             </p>
         );
 
-    // Subjects present in the active day (for dimming in legend)
     const activeDayIds = new Set(
         activeDay ? (localTimetable?.[activeDay] || []).map((s) => s._id) : [],
     );
@@ -393,7 +315,6 @@ const TimetablePage = () => {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-5">
                     <div>
-                        {/* Title + pencil inline */}
                         <div className="flex items-center gap-2">
                             <h1 className="font-playfair text-2xl font-bold text-[#1A1A2E]">
                                 Timetable
@@ -436,58 +357,39 @@ const TimetablePage = () => {
                 </div>
 
                 {/* Subject Legend */}
-                <div
-                    className={`bg-white border rounded-2xl p-4 sm:p-5 mb-3 transition-colors ${
-                        isEditMode && activeDay
-                            ? "border-[#9B72F5] ring-1 ring-[#9B72F5]"
-                            : "border-[#E2DBF0]"
-                    }`}
-                >
-                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#8070AA] mb-3">
-                        {isEditMode && activeDay
-                            ? `Adding to ${activeDay} — pick a subject`
-                            : "Subjects"}
-                    </p>
-                    {subjects.length === 0 ? (
-                        <p className="text-xs text-[#8070AA] font-medium">
-                            No subjects added yet.
-                        </p>
-                    ) : (
-                        <div className="flex flex-wrap gap-2">
-                            {subjects.map((subject) => {
-                                const isDisabled =
-                                    isEditMode &&
-                                    activeDay &&
-                                    activeDayIds.has(subject._id);
-                                const isClickable =
-                                    isEditMode && activeDay && !isDisabled;
-                                return (
-                                    <span
-                                        key={subject._id}
-                                        onClick={() =>
-                                            isClickable &&
-                                            handleAddSubject(subject)
-                                        }
-                                        className={`text-[11px] font-semibold border rounded-2xl px-3 py-1.5 sm:px-6 sm:py-3 transition-opacity
-                                            ${colorMap.get(subject._id)}
-                                            ${isDisabled ? "opacity-30" : ""}
-                                            ${isClickable ? "cursor-pointer" : ""}
-                                        `}
-                                    >
-                                        {subject.subjectName}
-                                    </span>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
+                {isEditMode && (
+                    <SubjectLegend
+                        subjects={subjects}
+                        activeDay={activeDay}
+                        activeDayIds={activeDayIds}
+                        colorMap={colorMap}
+                        onAddSubject={handleAddSubject}
+                        idleLabel="Subjects"
+                    />
+                )}
+                {!isEditMode && (
+                    <SubjectLegend
+                        subjects={subjects}
+                        activeDay={null}
+                        activeDayIds={new Set()}
+                        colorMap={colorMap}
+                        onAddSubject={() => {}}
+                        idleLabel="Subjects"
+                    />
+                )}
 
                 {/* Timetable Grid */}
                 {!hasTimetable ? (
-                    <div className="bg-white border border-[#E2DBF0] rounded-2xl p-4 sm:p-5">
+                    <div className="bg-white border border-[#E2DBF0] rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center">
                         <p className="text-xs text-[#8070AA] font-medium text-center py-6">
                             You have not added a timetable yet.
                         </p>
+                        <Button
+                            className="bg-[#E8E0F8] text-[#6B52B5] border-none rounded-xl px-4 text-sm font-semibold hover:bg-[#D6CBFA]"
+                            onClick={() => navigate("/add-timetable")}
+                        >
+                            <Plus size={18} className="" />
+                        </Button>
                     </div>
                 ) : (
                     <div className="bg-white border border-[#E2DBF0] rounded-2xl p-4 sm:p-5">
@@ -524,6 +426,7 @@ const TimetablePage = () => {
                                         setDeleteTarget({ subject, day })
                                     }
                                     onDrop={handleDrop}
+                                    totalSubjects={subjects.length}
                                 />
                             ))}
                         </div>

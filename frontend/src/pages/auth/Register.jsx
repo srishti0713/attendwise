@@ -112,7 +112,9 @@ const Register = () => {
                     className="w-full py-3 rounded-xl text-white text-sm font-bold cursor-pointer border-none"
                     style={{ background: "#1A1A2E" }}
                 >
-                    {mutation.isPending ? "Creating account..." : "Create Account"}
+                    {mutation.isPending
+                        ? "Creating account..."
+                        : "Create Account"}
                 </button>
 
                 {/* Divider */}
