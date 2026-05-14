@@ -1,0 +1,215 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useCurrentSemester from "../../hooks/useCurrentSemester";
+import useSubjects from "../../hooks/useSubjects";
+import { postTimetable } from "../../api/timetable.api";
+import Button from "../../components/buttons/Button";
+import {
+    DAYS,
+    DAY_SHORT,
+    SUBJECT_COLORS,
+    buildColorMap,
+} from "../../lib/timetableConfig.js";
+import SubjectCard from "../../components/timetable/SubjectCard";
+import SubjectLegend from "../../components/timetable/SubjectLegend";
+
+const buildEmptyTimetable = () => {
+    const tt = {};
+    DAYS.forEach((day) => (tt[day] = []));
+    return tt;
+};
+
+const AddTimetablePage = () => {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    const { data: semester, isLoading: semesterLoading } = useCurrentSemester();
+    const semesterId = semester?._id;
+
+    const { data: subjects = [], isLoading: subjectsLoading } =
+        useSubjects(semesterId);
+
+    const [timetable, setTimetable] = useState(buildEmptyTimetable);
+    const [activeDay, setActiveDay] = useState(null);
+
+    const colorMap = buildColorMap(subjects);
+
+    const saveMutation = useMutation({
+        mutationFn: () => {
+            const payload = {};
+            DAYS.forEach((day) => {
+                payload[day] = timetable[day].map((s) => s._id);
+            });
+            return postTimetable(semesterId, payload);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(["timetable", semesterId]);
+            navigate("/timetable");
+        },
+    });
+
+    const handleAddSubject = (subject) => {
+        if (!activeDay) return;
+        const alreadyIn = timetable[activeDay].some(
+            (s) => s._id === subject._id,
+        );
+        if (alreadyIn) return;
+        setTimetable((prev) => ({
+            ...prev,
+            [activeDay]: [
+                ...prev[activeDay],
+                { _id: subject._id, subjectName: subject.subjectName },
+            ],
+        }));
+    };
+
+    const handleRemoveSubject = (day, subject) => {
+        setTimetable((prev) => ({
+            ...prev,
+            [day]: prev[day].filter((s) => s._id !== subject._id),
+        }));
+    };
+
+    const handleCancel = () => navigate("/timetable");
+
+    const handleSave = () => saveMutation.mutate();
+
+    if (semesterLoading || subjectsLoading)
+        return (
+            <p className="text-center text-[#8070AA] font-medium mt-10">
+                Loading...
+            </p>
+        );
+
+    if (!semester)
+        return (
+            <p className="text-center text-[#8070AA] font-medium mt-10">
+                You have not added a semester yet.
+            </p>
+        );
+
+    const activeDayIds = new Set(
+        activeDay ? (timetable[activeDay] || []).map((s) => s._id) : [],
+    );
+
+    return (
+        <div className="w-full max-w-2xl mx-auto pb-24 px-3 sm:px-0">
+            {/* Header */}
+            <div className="flex items-start justify-between mb-5">
+                <div>
+                    <h1 className="font-playfair text-2xl font-bold text-[#1A1A2E]">
+                        Add Timetable
+                    </h1>
+                    <p className="font-sans text-sm sm:text-lg font-semibold text-[#8070AA]">
+                        Build your weekly subject schedule
+                    </p>
+                </div>
+
+                {/* Save / Cancel */}
+                <div className="flex gap-2 mt-1">
+                    <Button
+                        onClick={handleCancel}
+                        className="text-[#4A20C4] bg-[#D6CBFA] border border-[#C4B0F7] rounded-xl px-4 py-2 text-xs font-bold"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSave}
+                        disabled={saveMutation.isPending}
+                        className="bg-[#1A1A2E] text-white border-none rounded-xl px-4 py-2 text-xs font-bold disabled:opacity-60"
+                    >
+                        {saveMutation.isPending ? "Saving..." : "Save"}
+                    </Button>
+                </div>
+            </div>
+
+            {/* Subject Legend */}
+            <SubjectLegend
+                subjects={subjects}
+                activeDay={activeDay}
+                activeDayIds={activeDayIds}
+                colorMap={colorMap}
+                onAddSubject={handleAddSubject}
+                idleLabel="Subjects — select a day first"
+            />
+
+            {/* Timetable Grid */}
+            <div className="bg-white border border-[#E2DBF0] rounded-2xl p-4 sm:p-5">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#8070AA] mb-4">
+                    Weekly schedule
+                </p>
+
+                <div className="grid grid-cols-6 gap-1 sm:gap-2">
+                    {/* Day Headers */}
+                    {DAYS.map((day) => (
+                        <div
+                            key={day}
+                            className={`text-center text-[9px] sm:text-[10px] font-bold tracking-widest uppercase pb-2 border-b mb-1 transition-colors
+                                ${
+                                    activeDay === day
+                                        ? "text-[#9B72F5] border-[#9B72F5]"
+                                        : "text-[#8070AA] border-[#F0EBF8]"
+                                }`}
+                        >
+                            {DAY_SHORT[day]}
+                        </div>
+                    ))}
+
+                    {/* Day Columns */}
+                    {DAYS.map((day) => {
+                        const isActive = activeDay === day;
+                        return (
+                            <div
+                                key={day}
+                                className="flex flex-col gap-1 sm:gap-2"
+                            >
+                                {timetable[day].map((subject, index) => (
+                                    <SubjectCard
+                                        key={subject._id + index}
+                                        subject={subject}
+                                        colorClass={
+                                            colorMap.get(subject._id) ??
+                                            SUBJECT_COLORS[0]
+                                        }
+                                        isEditMode={true}
+                                        onDelete={(s) =>
+                                            handleRemoveSubject(day, s)
+                                        }
+                                        isDragging={false}
+                                    />
+                                ))}
+
+                                {/* Add slot */}
+                                {timetable[day].length < subjects.length && (
+                                    <button
+                                        onClick={() =>
+                                            setActiveDay(isActive ? null : day)
+                                        }
+                                        className={`border rounded-xl text-[10px] sm:text-[11px] font-semibold py-1.5 sm:py-2 w-full transition-colors
+                                        ${
+                                            isActive
+                                                ? "bg-[#1A1A2E] text-white border-[#1A1A2E]"
+                                                : "border-dashed border-[#C4B0F7] text-[#8070AA] bg-transparent"
+                                        }`}
+                                    >
+                                        {isActive ? "↑ Close" : "+ Add"}
+                                    </button>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Save error */}
+            {saveMutation.isError && (
+                <p className="text-xs text-[#7A1530] font-medium mt-3 text-center">
+                    Something went wrong. Please try again.
+                </p>
+            )}
+        </div>
+    );
+};
+
+export default AddTimetablePage;
