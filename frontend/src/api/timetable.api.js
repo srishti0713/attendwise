@@ -17,3 +17,12 @@ export const editTimetable = async (semesterId, day, subjects) => {
     });
     return data;
 };
+
+// Add this function to your existing timetable.api.js
+
+export const extractTimetable = async (formData) => {
+    const { data } = await api.post("/ai/extract-timetable", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+};
