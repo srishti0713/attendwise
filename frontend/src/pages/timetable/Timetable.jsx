@@ -1,20 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import useCurrentSemester from "../../hooks/useCurrentSemester";
 import useSubjects from "../../hooks/useSubjects";
 import { getTimetable, editTimetable } from "../../api/timetable.api";
 import ConfirmModal from "../../components/modal/ConfirmModal";
 import Button from "../../components/buttons/Button";
-import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import {
-    DAYS,
-    DAY_SHORT,
-    SUBJECT_COLORS,
-    buildColorMap,
-} from "../../lib/timetableConfig.js";
-import SubjectCard from "../../components/timetable/SubjectCard";
-import SubjectLegend from "../../components/timetable/SubjectLegend";
+import { DAYS, DAY_SHORT, SUBJECT_COLORS } from "../../lib/timetableConfig";
+import SubjectCard from "../../components/timetable/SubjectCard.jsx";
+
 
 const PencilIcon = () => (
     <svg
@@ -34,7 +28,20 @@ const PencilIcon = () => (
     </svg>
 );
 
-// Converts populated timetable (objects) to plain id-keyed structure for local state
+
+const buildColorMap = (subjects) => {
+    const map = new Map();
+    subjects.forEach((subject) => {
+        if (!map.has(subject._id)) {
+            map.set(
+                subject._id,
+                SUBJECT_COLORS[map.size % SUBJECT_COLORS.length]
+            );
+        }
+    });
+    return map;
+};
+
 const timetableToLocal = (timetable) => {
     const local = {};
     DAYS.forEach((day) => {
@@ -46,7 +53,6 @@ const timetableToLocal = (timetable) => {
     return local;
 };
 
-// DraggableColumn
 const DraggableColumn = ({
     day,
     subjects,
@@ -56,7 +62,6 @@ const DraggableColumn = ({
     onSetActiveDay,
     onDelete,
     onDrop,
-    totalSubjects,
 }) => {
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const draggingIndex = useRef(null);
@@ -77,7 +82,6 @@ const DraggableColumn = ({
         e.preventDefault();
         const raw = e.dataTransfer.getData("text/plain");
         const [fromDay, fromIndexStr] = raw.split("::");
-        // Only allow within the same day
         if (fromDay !== day) {
             setDragOverIndex(null);
             return;
@@ -115,9 +119,7 @@ const DraggableColumn = ({
                 >
                     <SubjectCard
                         subject={subject}
-                        colorClass={
-                            colorMap.get(subject._id) ?? SUBJECT_COLORS[0]
-                        }
+                        colorClass={colorMap.get(subject._id) ?? SUBJECT_COLORS[0]}
                         isEditMode={isEditMode}
                         onDelete={onDelete}
                         isDragging={false}
@@ -125,8 +127,7 @@ const DraggableColumn = ({
                 </div>
             ))}
 
-            {/* Add slot — only in edit mode */}
-            {isEditMode && subjects.length < totalSubjects && (
+            {isEditMode && (
                 <button
                     onClick={() => onSetActiveDay(isActive ? null : day)}
                     className={`border rounded-xl text-[10px] sm:text-[11px] font-semibold py-1.5 sm:py-2 w-full transition-colors
@@ -143,10 +144,9 @@ const DraggableColumn = ({
     );
 };
 
-// TimetablePage
 const TimetablePage = () => {
-    const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const { data: semester, isLoading: semesterLoading } = useCurrentSemester();
     const semesterId = semester?._id;
 
@@ -171,14 +171,12 @@ const TimetablePage = () => {
         retry: false,
     });
 
-    // Edit state
     const [isEditMode, setIsEditMode] = useState(false);
     const [localTimetable, setLocalTimetable] = useState(null);
     const [activeDay, setActiveDay] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
 
-    // Save all (reorder + add) — sends each modified day
     const saveMutation = useMutation({
         mutationFn: async () => {
             const original = timetableToLocal(timetableData.timetable);
@@ -202,7 +200,6 @@ const TimetablePage = () => {
         },
     });
 
-    // Delete single subject from a day — fires immediately
     const deleteMutation = useMutation({
         mutationFn: ({ day, subjectId }) => {
             const current = localTimetable[day].map((s) => s._id);
@@ -248,7 +245,7 @@ const TimetablePage = () => {
     const handleAddSubject = (subject) => {
         if (!activeDay) return;
         const alreadyIn = localTimetable[activeDay].some(
-            (s) => s._id === subject._id,
+            (s) => s._id === subject._id
         );
         if (alreadyIn) return;
         setLocalTimetable((prev) => ({
@@ -269,14 +266,17 @@ const TimetablePage = () => {
     };
 
     const colorMap = buildColorMap(subjects);
-
     const hasTimetable = !!timetableData && !timetableError;
 
     const displayTimetable = isEditMode
         ? localTimetable
         : hasTimetable
-          ? timetableToLocal(timetableData.timetable)
-          : null;
+        ? timetableToLocal(timetableData.timetable)
+        : null;
+
+    const maxSlots = displayTimetable
+        ? Math.max(...DAYS.map((d) => (displayTimetable[d] || []).length), 0)
+        : 0;
 
     if (semesterLoading || subjectsLoading || timetableLoading)
         return (
@@ -293,12 +293,11 @@ const TimetablePage = () => {
         );
 
     const activeDayIds = new Set(
-        activeDay ? (localTimetable?.[activeDay] || []).map((s) => s._id) : [],
+        activeDay ? (localTimetable?.[activeDay] || []).map((s) => s._id) : []
     );
 
     return (
         <>
-            {/* Delete Confirmation Modal */}
             {deleteTarget && (
                 <ConfirmModal
                     variant="danger"
@@ -315,6 +314,7 @@ const TimetablePage = () => {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-5">
                     <div>
+                        {/* Title + pencil inline */}
                         <div className="flex items-center gap-2">
                             <h1 className="font-playfair text-2xl font-bold text-[#1A1A2E]">
                                 Timetable
@@ -333,71 +333,91 @@ const TimetablePage = () => {
                         </p>
                     </div>
 
-                    {/* Edit / Save / Cancel */}
-                    {hasTimetable && (
+                    {/* Save / Cancel — only in edit mode */}
+                    {isEditMode && (
                         <div className="flex gap-2 mt-1">
-                            {isEditMode && (
-                                <div className="flex gap-2 mt-1">
-                                    <Button
-                                        onClick={handleCancelEdit}
-                                        className="text-[#4A20C4] bg-[#D6CBFA] border border-[#C4B0F7] rounded-xl px-4 py-2 text-xs font-bold"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        onClick={handleSave}
-                                        className="bg-[#1A1A2E] text-white border-none rounded-xl px-4 py-2 text-xs font-bold"
-                                    >
-                                        {isSaving ? "Saving..." : "Save"}
-                                    </Button>
-                                </div>
-                            )}
+                            <Button
+                                onClick={handleCancelEdit}
+                                className="text-[#4A20C4] bg-[#D6CBFA] border border-[#C4B0F7] rounded-xl px-4 py-2 text-xs font-bold"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleSave}
+                                className="bg-[#1A1A2E] text-white border-none rounded-xl px-4 py-2 text-xs font-bold"
+                            >
+                                {isSaving ? "Saving..." : "Save"}
+                            </Button>
                         </div>
                     )}
                 </div>
 
                 {/* Subject Legend */}
-                {isEditMode && (
-                    <SubjectLegend
-                        subjects={subjects}
-                        activeDay={activeDay}
-                        activeDayIds={activeDayIds}
-                        colorMap={colorMap}
-                        onAddSubject={handleAddSubject}
-                        idleLabel="Subjects"
-                    />
-                )}
-                {!isEditMode && (
-                    <SubjectLegend
-                        subjects={subjects}
-                        activeDay={null}
-                        activeDayIds={new Set()}
-                        colorMap={colorMap}
-                        onAddSubject={() => {}}
-                        idleLabel="Subjects"
-                    />
-                )}
+                <div
+                    className={`bg-white border rounded-2xl p-4 sm:p-5 mb-3 transition-colors ${
+                        isEditMode && activeDay
+                            ? "border-[#9B72F5] ring-1 ring-[#9B72F5]"
+                            : "border-[#E2DBF0]"
+                    }`}
+                >
+                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#8070AA] mb-3">
+                        {isEditMode && activeDay
+                            ? `Adding to ${activeDay} — pick a subject`
+                            : "Subjects"}
+                    </p>
+                    {subjects.length === 0 ? (
+                        <p className="text-xs text-[#8070AA] font-medium">
+                            No subjects added yet.
+                        </p>
+                    ) : (
+                        <div className="flex flex-wrap gap-2">
+                            {subjects.map((subject) => {
+                                const isDisabled =
+                                    isEditMode &&
+                                    activeDay &&
+                                    activeDayIds.has(subject._id);
+                                const isClickable =
+                                    isEditMode && activeDay && !isDisabled;
+                                return (
+                                    <span
+                                        key={subject._id}
+                                        onClick={() =>
+                                            isClickable &&
+                                            handleAddSubject(subject)
+                                        }
+                                        className={`text-[11px] font-semibold border rounded-2xl px-3 py-1.5 sm:px-6 sm:py-3 transition-opacity
+                                            ${colorMap.get(subject._id)}
+                                            ${isDisabled ? "opacity-30" : ""}
+                                            ${isClickable ? "cursor-pointer" : ""}
+                                        `}
+                                    >
+                                        {subject.subjectName}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
 
                 {/* Timetable Grid */}
                 {!hasTimetable ? (
-                    <div className="bg-white border border-[#E2DBF0] rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center">
-                        <p className="text-xs text-[#8070AA] font-medium text-center py-6">
-                            You have not added a timetable yet.
-                        </p>
-                        <Button
-                            className="bg-[#E8E0F8] text-[#6B52B5] border-none rounded-xl px-4 text-sm font-semibold hover:bg-[#D6CBFA]"
-                            onClick={() => navigate("/add-timetable")}
-                        >
-                            <Plus size={18} className="" />
-                        </Button>
-                    </div>
+                    <button
+                        onClick={() => navigate("/add-timetable")}
+                        className="w-full bg-white border-2 border-dashed border-[#C4B0F7] rounded-2xl p-8 flex flex-col items-center gap-2 text-[#8070AA]"
+                    >
+                        <span className="text-xs font-bold">
+                            Add your timetable
+                        </span>
+                        <span className="text-[11px] font-medium text-[#B0A0CC]">
+                            Tap to get started
+                        </span>
+                    </button>
                 ) : (
                     <div className="bg-white border border-[#E2DBF0] rounded-2xl p-4 sm:p-5">
                         <p className="text-[11px] font-bold tracking-widest uppercase text-[#8070AA] mb-4">
                             Weekly schedule
                         </p>
                         <div className="grid grid-cols-6 gap-1 sm:gap-2">
-                            {/* Day Headers */}
                             {DAYS.map((day) => (
                                 <div
                                     key={day}
@@ -412,7 +432,6 @@ const TimetablePage = () => {
                                 </div>
                             ))}
 
-                            {/* Columns — one per day */}
                             {DAYS.map((day) => (
                                 <DraggableColumn
                                     key={day}
@@ -426,7 +445,6 @@ const TimetablePage = () => {
                                         setDeleteTarget({ subject, day })
                                     }
                                     onDrop={handleDrop}
-                                    totalSubjects={subjects.length}
                                 />
                             ))}
                         </div>
