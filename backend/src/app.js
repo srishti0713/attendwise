@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { startReminderCron } from "./utils/reminderCron.js";
+import { startReminderCron } from "./services/reminderCron.service.js";
+import { startAttendanceWarningCron } from "./services/attendanceCron.service.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import subjectRoutes from "./routes/subject.routes.js";
@@ -34,5 +35,6 @@ app.use("/api/v1/assignments", assignmentRoutes);
 app.use("/api/v1/ai", aiRoutes);
 
 startReminderCron();
+startAttendanceWarningCron();
 
 export default app;

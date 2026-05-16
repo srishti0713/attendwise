@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import Assignment from "../models/assignment.model.js";
-import { sendDueDateEmail } from "../utils/mailer.js";
+import { sendDueDateEmail } from "./mailer.service.js";
 
 export const startReminderCron = () => {
     cron.schedule(
