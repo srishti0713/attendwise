@@ -13,7 +13,7 @@ export const getSubjects = async (semesterId) => {
 };
 
 export const getSubject = async (subjectId) => {
-    const { data } = await api.get(`/subjects/${subjectId}`);
+    const { data } = await api.get(`/subjects/get-subject/${subjectId}`);
     return data;
 };
 

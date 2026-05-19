@@ -182,7 +182,7 @@ export const addSubject = async (req, res) => {
 export const updateSubject = async (req, res) => {
     try {
         const { subjectId } = req.params;
-        let { subjectName, date, status } = req.body;
+        let { subjectName, attendanceId, status } = req.body;
 
         // Validate subject ID
         if (!mongoose.Types.ObjectId.isValid(subjectId)) {
@@ -199,7 +199,6 @@ export const updateSubject = async (req, res) => {
         }
 
         // Update subject name
-
         if (subjectName !== undefined) {
             subjectName = subjectName.trim();
 
@@ -222,58 +221,29 @@ export const updateSubject = async (req, res) => {
         }
 
         // Update attendance
-
-        if ((date && !status) || (!date && status)) {
+        if ((attendanceId && !status) || (!attendanceId && status)) {
             return res.status(400).json({
-                message: "Both date and status are required",
+                message: "Both attendanceId and status are required",
             });
         }
-        if (date !== undefined && status !== undefined) {
+
+        if (attendanceId !== undefined && status !== undefined) {
             const validStatuses = ["attended", "missed", "off"];
-
             if (!validStatuses.includes(status)) {
-                return res.status(400).json({
-                    message: "Invalid status value",
-                });
+                return res.status(400).json({ message: "Invalid status value" });
             }
 
-            const parsedDate = new Date(date);
-
-            if (isNaN(parsedDate)) {
-                return res.status(400).json({
-                    message: "Invalid date format",
-                });
+            const existingEntry = subject.attendance.id(attendanceId);
+            if (!existingEntry) {
+                return res.status(404).json({ message: "Attendance entry not found" });
             }
 
-            // Normalize date (avoid time issues)
-            const normalizedDate = new Date(
-                parsedDate.getFullYear(),
-                parsedDate.getMonth(),
-                parsedDate.getDate(),
-            );
-
-            const existingEntry = subject.attendance.find(
-                (entry) =>
-                    new Date(entry.date).toDateString() ===
-                    normalizedDate.toDateString(),
-            );
-
-            if (existingEntry) {
-                // Update existing record
-                existingEntry.status = status;
-            } else {
-                // Add new record
-                subject.attendance.push({
-                    date: normalizedDate,
-                    status,
-                });
-            }
+            existingEntry.status = status;
         }
 
         await subject.save();
 
         // Return with stats
-
         const user = await User.findById(req.user._id);
 
         const stats = getAttendanceStats(

@@ -9,6 +9,7 @@ import TimetablePage from "../pages/timetable/Timetable";
 import AddSemesterPage from "../pages/semester/AddSemesterPage";
 import EditSemesterPage from "../pages/semester/EditSemesterPage";
 import AddTimetablePage from "../pages/timetable/AddTimetablePage";
+import SubjectAttendanceDetail from "../pages/subjects/SubjectAttendanceDetail";
 
 export const routes = [
     {
@@ -77,4 +78,10 @@ export const routes = [
         protected: true,
         publicOnly: false,
     },
+    {
+        path: "/subjects/:subjectId/attendance",
+        element: <SubjectAttendanceDetail />,
+        protected: true,
+        publicOnly: false,
+    }
 ];
