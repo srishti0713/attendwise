@@ -40,11 +40,11 @@ export const startAttendanceWarningCron = () => {
                         if (!user?.email) continue;
 
                         const safe = user.attendanceThreshold ?? 75;
-                        const target = safe; 
+                        const target = safe;
 
                         // Use your actual util with the subject's attendance logs
                         const stats = getAttendanceStats(
-                            subject.attendance ?? [], 
+                            subject.attendance ?? [],
                             safe,
                             target,
                         );
@@ -55,7 +55,11 @@ export const startAttendanceWarningCron = () => {
                         const studentId = user._id.toString();
 
                         if (!studentMap[studentId]) {
-                            studentMap[studentId] = { user, safe, subjects: [] };
+                            studentMap[studentId] = {
+                                user,
+                                safe,
+                                subjects: [],
+                            };
                         }
 
                         studentMap[studentId].subjects.push({
@@ -64,7 +68,7 @@ export const startAttendanceWarningCron = () => {
                             total: stats.total,
                             percentage: stats.attendancePercentage,
                             classesToSafeZone: stats.classesToSafeZone,
-                            message: stats.message,                      
+                            message: stats.message,
                         });
                     }
                 }
@@ -72,7 +76,9 @@ export const startAttendanceWarningCron = () => {
                 const students = Object.values(studentMap);
 
                 if (!students.length) {
-                    console.log("All students are above their safe threshold today.");
+                    console.log(
+                        "All students are above their safe threshold today.",
+                    );
                     return;
                 }
 

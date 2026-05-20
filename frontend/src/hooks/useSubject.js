@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSubject } from "../api/subject.api";
 
-const useSubject = (subjectId) =>{
+const useSubject = (subjectId) => {
     return useQuery({
         queryKey: ["subject", subjectId],
         queryFn: async () => {

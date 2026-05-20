@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 
-
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -58,7 +57,9 @@ export const sendDueDateEmail = async (
 
 export const sendAttendanceWarningEmail = async (name, to, subjects, safe) => {
     try {
-        const subjectRows = subjects.map((s) => `
+        const subjectRows = subjects
+            .map(
+                (s) => `
             <!-- Desktop row -->
             <tr class="desktop-row">
                 <td style="padding: 10px; border: 1px solid #e0e0e0;">
@@ -77,10 +78,14 @@ export const sendAttendanceWarningEmail = async (name, to, subjects, safe) => {
                     ${s.message}
                 </td>
             </tr>
-        `).join("");
+        `,
+            )
+            .join("");
 
         // Mobile cards — one card per subject
-        const mobileCards = subjects.map((s) => `
+        const mobileCards = subjects
+            .map(
+                (s) => `
             <div class="mobile-card" style="background: #F9FAFB; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; margin-bottom: 12px;">
                 <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 15px; color: #111827;">
                     ${s.subjectName}
@@ -98,7 +103,9 @@ export const sendAttendanceWarningEmail = async (name, to, subjects, safe) => {
                     💬 ${s.message}
                 </p>
             </div>
-        `).join("");
+        `,
+            )
+            .join("");
 
         await transporter.sendMail({
             from: `"AttendWise" <${process.env.EMAIL_USER}>`,

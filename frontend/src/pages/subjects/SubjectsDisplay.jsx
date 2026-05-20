@@ -57,8 +57,13 @@ const SubjectRow = ({ subject }) => {
     ];
 
     return (
-        <div className={`${cardStyle} rounded-2xl p-4 w-full max-w-2xl mx-auto`}>
-            <div className="flex items-center gap-4" onClick={() => navigate(`/subjects/${subject._id}/attendance`)}>
+        <div
+            className={`${cardStyle} rounded-2xl p-4 w-full max-w-2xl mx-auto`}
+        >
+            <div
+                className="flex items-center gap-4"
+                onClick={() => navigate(`/subjects/${subject._id}/attendance`)}
+            >
                 <AttendanceCircle
                     percentage={subject.attendancePercentage}
                     status={subject.status}
@@ -81,8 +86,12 @@ const SubjectRow = ({ subject }) => {
             <div className="mt-3 pt-3 border-t border-black/10 grid grid-cols-4 text-center">
                 {stats.map(({ label, value }) => (
                     <div key={label}>
-                        <p className="text-base font-bold text-[#1A1A2E]">{value}</p>
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#1A1A2E]/50">{label}</p>
+                        <p className="text-base font-bold text-[#1A1A2E]">
+                            {value}
+                        </p>
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#1A1A2E]/50">
+                            {label}
+                        </p>
                     </div>
                 ))}
             </div>
@@ -90,7 +99,7 @@ const SubjectRow = ({ subject }) => {
     );
 };
 
-// Pencil icon 
+// Pencil icon
 const PencilIcon = () => (
     <svg
         width="13"

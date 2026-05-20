@@ -83,5 +83,5 @@ export const routes = [
         element: <SubjectAttendanceDetail />,
         protected: true,
         publicOnly: false,
-    }
+    },
 ];
