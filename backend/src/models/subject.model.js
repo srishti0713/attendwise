@@ -23,6 +23,7 @@ const subjectSchema = new Schema(
                     date: {
                         type: Date,
                         required: true,
+                        unique: true,
                     },
                     status: {
                         type: String,

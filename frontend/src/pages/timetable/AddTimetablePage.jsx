@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import useCurrentSemester from "../../hooks/useCurrentSemester";
 import useSubjects from "../../hooks/useSubjects";
 import { postTimetable, extractTimetable } from "../../api/timetable.api";
+import { addSubject } from "../../api/subject.api.js";
 import Button from "../../components/buttons/Button";
 import {
     DAYS,
@@ -97,6 +98,28 @@ const AddTimetablePage = () => {
 
             setTimetable(newTimetable);
             setUnmatchedSubjects([...unmatched]);
+        },
+    });
+
+    // Track per-subject add state: "idle" | "loading" | "added" | "error"
+    const [unmatchedState, setUnmatchedState] = useState({});
+
+    const addSubjectMutation = useMutation({
+        mutationFn: (subjectName) => addSubject({ subjectName }, semesterId),
+
+        onMutate: (subjectName) => {
+            setUnmatchedState((prev) => ({
+                ...prev,
+                [subjectName]: "loading",
+            }));
+        },
+        onSuccess: (newSubject, subjectName) => {
+            setUnmatchedState((prev) => ({ ...prev, [subjectName]: "added" }));
+            // Refresh subjects list so the new subject appears in the legend + colorMap
+            queryClient.invalidateQueries(["subjects", semesterId]);
+        },
+        onError: (_, subjectName) => {
+            setUnmatchedState((prev) => ({ ...prev, [subjectName]: "error" }));
         },
     });
 
@@ -209,9 +232,10 @@ const AddTimetablePage = () => {
                 <button
                     onClick={() => handleModeSwitch("manual")}
                     className={`flex-1 rounded-xl py-2 text-xs font-bold transition-colors
-                        ${mode === "manual"
-                            ? "bg-[#1A1A2E] text-white"
-                            : "text-[#8070AA]"
+                        ${
+                            mode === "manual"
+                                ? "bg-[#1A1A2E] text-white"
+                                : "text-[#8070AA]"
                         }`}
                 >
                     Manual
@@ -219,9 +243,10 @@ const AddTimetablePage = () => {
                 <button
                     onClick={() => handleModeSwitch("ai")}
                     className={`flex-1 rounded-xl py-2 text-xs font-bold transition-colors
-                        ${mode === "ai"
-                            ? "bg-[#1A1A2E] text-white"
-                            : "text-[#8070AA]"
+                        ${
+                            mode === "ai"
+                                ? "bg-[#1A1A2E] text-white"
+                                : "text-[#8070AA]"
                         }`}
                 >
                     AI Extract
@@ -284,28 +309,63 @@ const AddTimetablePage = () => {
                                 Some subjects weren't matched
                             </p>
                             <p className="text-[11px] text-[#7A1530] mb-2">
-                                These subjects were found in your image but are
-                                not in your semester. Add them to your semester
-                                first:
+                                These subjects were found in your image but
+                                aren't in your semester yet. Tap{" "}
+                                <strong>+ Add</strong> to include them.
                             </p>
                             <div className="flex flex-wrap gap-1.5">
-                                {unmatchedSubjects.map((name) => (
-                                    <span
-                                        key={name}
-                                        className="text-[11px] font-semibold bg-[#F5B8C8] border border-[#E88FA8] text-[#7A1530] rounded-xl px-3 py-1"
-                                    >
-                                        {name}
-                                    </span>
-                                ))}
+                                {unmatchedSubjects.map((name) => {
+                                    const state =
+                                        unmatchedState[name] ?? "idle";
+                                    return (
+                                        <button
+                                            key={name}
+                                            disabled={
+                                                state === "loading" ||
+                                                state === "added"
+                                            }
+                                            onClick={() =>
+                                                addSubjectMutation.mutate(name)
+                                            }
+                                            className={`flex items-center gap-1.5 text-[11px] font-semibold rounded-xl px-3 py-1 border transition-colors
+                            ${
+                                state === "added"
+                                    ? "bg-[#D1FAE5] border-[#6EE7B7] text-[#065F46]"
+                                    : state === "error"
+                                      ? "bg-[#FEE2E2] border-[#FCA5A5] text-[#7F1D1D]"
+                                      : state === "loading"
+                                        ? "bg-[#F5B8C8] border-[#E88FA8] text-[#7A1530] opacity-60"
+                                        : "bg-[#F5B8C8] border-[#E88FA8] text-[#7A1530] hover:bg-[#9B72F5] hover:border-[#9B72F5] hover:text-white"
+                            }`}
+                                        >
+                                            {state === "added"
+                                                ? "✓"
+                                                : state === "loading"
+                                                  ? "…"
+                                                  : state === "error"
+                                                    ? "✕ Retry"
+                                                    : `+ ${name}`}
+                                        </button>
+                                    );
+                                })}
                             </div>
+                            {Object.values(unmatchedState).some(
+                                (s) => s === "added",
+                            ) && (
+                                <p className="text-[11px] text-[#065F46] font-semibold mt-2">
+                                    Added subjects will appear in the legend.
+                                    You can now assign them to days.
+                                </p>
+                            )}
                         </div>
                     )}
 
-                    {extractedSuccessfully && unmatchedSubjects.length === 0 && (
-                        <p className="text-xs text-[#2E8B57] font-semibold mt-3 text-center">
-                            All subjects matched — review and save below.
-                        </p>
-                    )}
+                    {extractedSuccessfully &&
+                        unmatchedSubjects.length === 0 && (
+                            <p className="text-xs text-[#2E8B57] font-semibold mt-3 text-center">
+                                All subjects matched — review and save below.
+                            </p>
+                        )}
                 </div>
             )}
 

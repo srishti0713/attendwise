@@ -16,14 +16,11 @@ export const getSubjects = async (req, res) => {
         const userId = req.user._id;
         const { semesterId } = req.params;
 
-        // Validate semester ID
         if (!mongoose.Types.ObjectId.isValid(semesterId))
             return res.status(400).json({ message: "Invalid semester ID" });
 
-        // Find user
         const user = await User.findById(userId);
 
-        // Find semester
         const semester = await Semester.findOne({
             _id: semesterId,
             userId,
@@ -34,21 +31,15 @@ export const getSubjects = async (req, res) => {
         if (!semester)
             return res.status(404).json({ message: "Subjects not found" });
 
-        // Attendance details calculation
         const result = semester.subjects.map((subject) => {
             const stats = getAttendanceStats(
                 subject.attendance,
                 user.safePercentage,
                 user.targetPercentage,
             );
-
-            return {
-                ...subject,
-                ...stats,
-            };
+            return { ...subject, ...stats };
         });
 
-        // Calculate overall AFTER stats are computed
         const overallStats = getOverallAttendance(result);
 
         const finalResult = result.map((subject) => ({
@@ -67,15 +58,12 @@ export const getSubject = async (req, res) => {
         const userId = req.user._id;
         const { subjectId } = req.params;
 
-        // Validate subject ID
         if (!mongoose.Types.ObjectId.isValid(subjectId))
             return res.status(400).json({ message: "Invalid subject ID" });
 
-        // Find user
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        // Find subject
         const subject = await Subject.findOne({
             _id: subjectId,
             userId,
@@ -83,17 +71,13 @@ export const getSubject = async (req, res) => {
         if (!subject)
             return res.status(404).json({ message: "Subject not found" });
 
-        // Return with stats
         const stats = getAttendanceStats(
             subject.attendance,
             user.safePercentage,
             user.targetPercentage,
         );
 
-        return res.status(200).json({
-            ...subject,
-            ...stats,
-        });
+        return res.status(200).json({ ...subject, ...stats });
     } catch (error) {
         return throwError(res, error, "getSubject");
     }
@@ -101,14 +85,13 @@ export const getSubject = async (req, res) => {
 
 export const addSubject = async (req, res) => {
     try {
+        console.log("body:", req.body);
+        console.log("params:", req.params);
         const { semesterId } = req.params;
         let { subjectName, totalClasses, attendedClasses } = req.body;
 
-        // Sanitization
         subjectName = subjectName?.trim();
 
-        // Field validation
-        // Semester ID
         if (!mongoose.Types.ObjectId.isValid(semesterId))
             return res.status(400).json({ message: "Invalid semester ID" });
 
@@ -119,7 +102,6 @@ export const addSubject = async (req, res) => {
         if (!semester)
             return res.status(404).json({ message: "Semester not found" });
 
-        // Subject name
         if (!subjectName)
             return res
                 .status(400)
@@ -133,25 +115,20 @@ export const addSubject = async (req, res) => {
                 message: `Subject name must be between ${MIN_TITLE_LENGTH} and ${MAX_TITLE_LENGTH} characters`,
             });
 
-        // Total classes
         if (totalClasses !== undefined) {
             totalClasses = Number(totalClasses);
-
             if (isNaN(totalClasses) || totalClasses < 0)
                 return res
                     .status(400)
                     .json({ message: "Invalid number of total classes" });
         }
 
-        // Attended classes
         if (attendedClasses !== undefined) {
             attendedClasses = Number(attendedClasses);
-
             if (attendedClasses < 0 || isNaN(attendedClasses))
                 return res
                     .status(400)
                     .json({ message: "Invalid number of attended classes" });
-
             if (totalClasses !== undefined && attendedClasses > totalClasses)
                 return res.status(400).json({
                     message:
@@ -159,7 +136,6 @@ export const addSubject = async (req, res) => {
                 });
         }
 
-        // Create subject
         const subject = await Subject.create({
             userId: req.user._id,
             semesterId,
@@ -168,7 +144,6 @@ export const addSubject = async (req, res) => {
             attendedClasses,
         });
 
-        // Push subject into semester
         await Semester.findByIdAndUpdate(semesterId, {
             $push: { subjects: subject._id },
         });
@@ -182,9 +157,8 @@ export const addSubject = async (req, res) => {
 export const updateSubject = async (req, res) => {
     try {
         const { subjectId } = req.params;
-        let { subjectName, attendanceId, status } = req.body;
+        let { subjectName, attendanceId, status, date } = req.body;
 
-        // Validate subject ID
         if (!mongoose.Types.ObjectId.isValid(subjectId)) {
             return res.status(400).json({ message: "Invalid subject ID" });
         }
@@ -220,30 +194,66 @@ export const updateSubject = async (req, res) => {
             subject.subjectName = subjectName;
         }
 
-        // Update attendance
-        if ((attendanceId && !status) || (!attendanceId && status)) {
-            return res.status(400).json({
-                message: "Both attendanceId and status are required",
-            });
+        // Add new attendance entry
+        if (
+            date !== undefined &&
+            status !== undefined &&
+            attendanceId === undefined
+        ) {
+            const existingEntry = subject.attendance.find(
+                (entry) =>
+                    entry.date.toISOString().slice(0, 10) ===
+                    new Date(date).toISOString().slice(0, 10),
+            );
+            if (existingEntry) {
+                return res.status(400).json({
+                    message: "Attendance entry for this date already exists",
+                });
+            }
+            const validStatuses = ["attended", "missed", "off"];
+            if (!validStatuses.includes(status)) {
+                return res
+                    .status(400)
+                    .json({ message: "Invalid status value" });
+            }
+
+            subject.attendance.push({ date, status });
         }
 
+        //  Update existing attendance entry
         if (attendanceId !== undefined && status !== undefined) {
             const validStatuses = ["attended", "missed", "off"];
             if (!validStatuses.includes(status)) {
-                return res.status(400).json({ message: "Invalid status value" });
+                return res
+                    .status(400)
+                    .json({ message: "Invalid status value" });
             }
 
             const existingEntry = subject.attendance.id(attendanceId);
             if (!existingEntry) {
-                return res.status(404).json({ message: "Attendance entry not found" });
+                return res
+                    .status(404)
+                    .json({ message: "Attendance entry not found" });
             }
 
             existingEntry.status = status;
         }
 
+        //  Attendance fields provided but incomplete
+        if (
+            (attendanceId !== undefined && status === undefined) ||
+            (attendanceId === undefined &&
+                status === undefined &&
+                date === undefined &&
+                subjectName === undefined)
+        ) {
+            return res
+                .status(400)
+                .json({ message: "No valid fields to update" });
+        }
+
         await subject.save();
 
-        // Return with stats
         const user = await User.findById(req.user._id);
 
         const stats = getAttendanceStats(
@@ -269,13 +279,11 @@ export const deleteSubject = async (req, res) => {
 
         const { subjectId } = req.params;
 
-        // Validate subject ID
         if (!mongoose.Types.ObjectId.isValid(subjectId)) {
             await session.abortTransaction();
             return res.status(400).json({ message: "Invalid subject ID" });
         }
 
-        // Find subject
         const subject = await Subject.findOne({
             _id: subjectId,
             userId: req.user._id,
@@ -286,14 +294,12 @@ export const deleteSubject = async (req, res) => {
             return res.status(404).json({ message: "Subject not found" });
         }
 
-        // Remove from semester
         await Semester.findOneAndUpdate(
             { _id: subject.semesterId, userId: req.user._id },
             { $pull: { subjects: subjectId } },
             { session },
         );
 
-        // Remove from timetable
         await Timetable.updateMany(
             { semesterId: subject.semesterId },
             {
@@ -309,20 +315,18 @@ export const deleteSubject = async (req, res) => {
             { session },
         );
 
-        // Remove assignments
         await Assignment.deleteMany(
             { subjectId, userId: req.user._id },
             { session },
         );
 
-        // Delete subject
         await subject.deleteOne({ session });
 
         await session.commitTransaction();
 
-        return res.status(200).json({
-            message: "Subject deleted successfully",
-        });
+        return res
+            .status(200)
+            .json({ message: "Subject deleted successfully" });
     } catch (error) {
         await session.abortTransaction();
         return throwError(res, error, "deleteSubject");

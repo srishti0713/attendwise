@@ -49,11 +49,30 @@ const Card = ({
                 status: attendanceStatus,
             }),
         onSuccess: () => {
-            queryClient.invalidateQueries({
+            queryClient.refetchQueries({
                 queryKey: ["timetable", semesterId],
             });
         },
     });
+
+    // Derive message from props — works for both 2-level and 3-level modes
+    const getInfoMessage = () => {
+        if (classesToSafe > 0) {
+            return `You need to attend ${classesToSafe} ${classesToSafe === 1 ? "class" : "classes"} to reach safe zone`;
+        }
+        if (classesToGoal > 0) {
+            return `Attend ${classesToGoal} ${classesToGoal === 1 ? "class" : "classes"} more to reach goal`;
+        }
+        if (canMiss > 0) {
+            return `You can miss ${canMiss} ${canMiss === 1 ? "class" : "classes"}`;
+        }
+        if (status === "safe") {
+            return "Attend every class to stay safe";
+        }
+        return "";
+    };
+
+    const infoMessage = getInfoMessage();
 
     return (
         <div
@@ -67,15 +86,9 @@ const Card = ({
                         {subject}
                     </h2>
                 </div>
-                <p className="text-sm text-gray-700 pl-1">
-                    {classesToSafe > 0
-                        ? `You need to attend ${classesToSafe} ${classesToSafe === 1 ? "class" : "classes"}`
-                        : classesToGoal > 0
-                          ? `You need to attend ${classesToGoal} ${classesToGoal === 1 ? "class" : "classes"}`
-                          : canMiss > 0
-                            ? `You can miss ${canMiss}  ${canMiss === 1 ? "class" : "classes"}`
-                            : ""}
-                </p>
+                {infoMessage && (
+                    <p className="text-sm text-gray-700 pl-1">{infoMessage}</p>
+                )}
             </div>
 
             {/* Bottom Row */}
