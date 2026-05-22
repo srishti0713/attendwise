@@ -1,10 +1,13 @@
 import Card from "../../components/subject/Card";
 import moment from "moment";
 import useTodaySubjects from "../../hooks/useTodaySubjects.js";
+import useSubjects from "../../hooks/useSubjects.js";
 import { useSearchParams } from "react-router-dom";
+import AssignmentsTab from "../../components/tabs/AssignmentTab.jsx";
 
 const HomePage = () => {
     const { todaySubjects, isLoading, semester } = useTodaySubjects();
+    const { data: semesterSubjects = [] } = useSubjects(semester?._id);
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get("tab") || "attendance";
 
@@ -67,11 +70,10 @@ const HomePage = () => {
             )}
 
             {activeTab === "assignments" && (
-                <div className="flex flex-col gap-3 w-full">
-                    <p className="text-sm text-[#8070AA] font-semibold text-center mt-10">
-                        Assignments coming soon
-                    </p>
-                </div>
+                <AssignmentsTab
+                    semesterId={semester?._id}
+                    subjects={semesterSubjects} // or pass all semester subjects if available
+                />
             )}
         </div>
     );
