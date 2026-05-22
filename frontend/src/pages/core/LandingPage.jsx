@@ -1,6 +1,7 @@
 import React from "react";
 import Button from "../../components/buttons/Button";
 import { useNavigate } from "react-router-dom";
+import LandingFooter from "../../components/footer/LandingFooter";
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -15,6 +16,14 @@ const LandingPage = () => {
         >
             {/* Hero */}
             <div className="flex flex-col items-center text-center mt-8">
+
+                {/* Logo above title */}
+                <img
+                    src="/attendwise-logo-circle.png"
+                    alt="AttendWise Logo"
+                    className="w-20 h-20 object-contain mb-4 drop-shadow-lg"
+                />
+
                 <h1 className="font-playfair text-5xl md:text-6xl font-bold text-[#1A1A2E] mb-4 tracking-tight">
                     AttendWise
                 </h1>
@@ -81,6 +90,7 @@ const LandingPage = () => {
                     </div>
                 ))}
             </div>
+            <LandingFooter />
         </div>
     );
 };
