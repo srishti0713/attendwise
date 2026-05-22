@@ -9,7 +9,6 @@ import Button from "../../components/buttons/Button";
 import { DAYS, DAY_SHORT, SUBJECT_COLORS } from "../../lib/timetableConfig";
 import SubjectCard from "../../components/timetable/SubjectCard.jsx";
 
-
 const PencilIcon = () => (
     <svg
         width="13"
@@ -28,14 +27,13 @@ const PencilIcon = () => (
     </svg>
 );
 
-
 const buildColorMap = (subjects) => {
     const map = new Map();
     subjects.forEach((subject) => {
         if (!map.has(subject._id)) {
             map.set(
                 subject._id,
-                SUBJECT_COLORS[map.size % SUBJECT_COLORS.length]
+                SUBJECT_COLORS[map.size % SUBJECT_COLORS.length],
             );
         }
     });
@@ -119,7 +117,9 @@ const DraggableColumn = ({
                 >
                     <SubjectCard
                         subject={subject}
-                        colorClass={colorMap.get(subject._id) ?? SUBJECT_COLORS[0]}
+                        colorClass={
+                            colorMap.get(subject._id) ?? SUBJECT_COLORS[0]
+                        }
                         isEditMode={isEditMode}
                         onDelete={onDelete}
                         isDragging={false}
@@ -245,7 +245,7 @@ const TimetablePage = () => {
     const handleAddSubject = (subject) => {
         if (!activeDay) return;
         const alreadyIn = localTimetable[activeDay].some(
-            (s) => s._id === subject._id
+            (s) => s._id === subject._id,
         );
         if (alreadyIn) return;
         setLocalTimetable((prev) => ({
@@ -271,8 +271,8 @@ const TimetablePage = () => {
     const displayTimetable = isEditMode
         ? localTimetable
         : hasTimetable
-        ? timetableToLocal(timetableData.timetable)
-        : null;
+          ? timetableToLocal(timetableData.timetable)
+          : null;
 
     const maxSlots = displayTimetable
         ? Math.max(...DAYS.map((d) => (displayTimetable[d] || []).length), 0)
@@ -293,7 +293,7 @@ const TimetablePage = () => {
         );
 
     const activeDayIds = new Set(
-        activeDay ? (localTimetable?.[activeDay] || []).map((s) => s._id) : []
+        activeDay ? (localTimetable?.[activeDay] || []).map((s) => s._id) : [],
     );
 
     return (

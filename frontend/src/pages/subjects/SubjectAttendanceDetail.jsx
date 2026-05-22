@@ -298,15 +298,15 @@ const SubjectAttendanceDetail = () => {
     });
 
     const handleSelect = (newStatus) => {
-    if (!editingEntry) return;
-    attendanceMutation.mutate({
-        subjectId,
-        payload: {
-            attendanceId: editingEntry._id,
-            status: newStatus,
-        },
-    });
-};
+        if (!editingEntry) return;
+        attendanceMutation.mutate({
+            subjectId,
+            payload: {
+                attendanceId: editingEntry._id,
+                status: newStatus,
+            },
+        });
+    };
     const handleOpenModal = (entry) => {
         setModalError("");
         setEditingEntry(entry);
