@@ -7,57 +7,57 @@ export const addAssignment = async ({
     dueDate,
 }) => {
     const { data } = await api.post(
-        `/add-assignment/${subjectId}`,
-        { title, description, dueDate },
-        { withCredentials: true },
+        `/assignments/create-assignment/${subjectId}`,
+        payload,
+        {
+            headers: { "Content-Type": "application/json" },
+        },
     );
     return data;
 };
 
 export const getAssignment = async (assignmentId) => {
-    const { data } = await api.get(`/get-assignment/${assignmentId}`, {
-        withCredentials: true,
-    });
+    const { data } = await api.get(
+        `/assignments/get-assignment/${assignmentId}`,
+    );
     return data;
 };
 
 export const getSubjectAssignments = async (subjectId) => {
-    const { data } = await api.get(`/get-subjectAssignments/${subjectId}`, {
-        withCredentials: true,
-    });
+    const { data } = await api.get(
+        `/assignments/get-subjectAssignments/${subjectId}`,
+    );
     return data;
 };
 
 export const getCompletedAssignments = async (subjectId) => {
-    const { data } = await api.get(`/get-completedAssignments/${subjectId}`, {
-        withCredentials: true,
-    });
+    const { data } = await api.get(
+        `/assignments/get-completedAssignments/${subjectId}`,
+    );
     return data;
 };
 
 export const getSemesterAssignments = async (semesterId) => {
     const { data } = await api.get(
-        `${BASE_URL}/get-semesterAssignments/${semesterId}`,
-        { withCredentials: true },
+        `/assignments/get-semesterAssignments/${semesterId}`,
     );
     return data;
 };
 
-// ─── Edit an assignment (title, description, dueDate, status) ─────────────────
 export const editAssignment = async ({ assignmentId, ...fields }) => {
-    const { data } = await axios.patch(
-        `${BASE_URL}/edit-assignment/${assignmentId}`,
+    const { data } = await api.patch(
+        `/assignments/edit-assignment/${assignmentId}`,
         fields,
-        { withCredentials: true },
+        {
+            headers: { "Content-Type": "application/json" },
+        },
     );
     return data;
 };
 
-// ─── Delete an assignment ─────────────────────────────────────────────────────
 export const deleteAssignment = async (assignmentId) => {
-    const { data } = await axios.delete(
-        `${BASE_URL}/delete-assignment/${assignmentId}`,
-        { withCredentials: true },
+    const { data } = await api.delete(
+        `/assignments/delete-assignment/${assignmentId}`,
     );
     return data;
 };

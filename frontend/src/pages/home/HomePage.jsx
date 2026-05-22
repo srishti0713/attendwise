@@ -1,11 +1,13 @@
 import Card from "../../components/subject/Card";
 import moment from "moment";
 import useTodaySubjects from "../../hooks/useTodaySubjects.js";
+import useSubjects from "../../hooks/useSubjects.js";
 import { useSearchParams } from "react-router-dom";
 import AssignmentsTab from "../../components/tabs/AssignmentTab.jsx";
 
 const HomePage = () => {
     const { todaySubjects, isLoading, semester } = useTodaySubjects();
+    const { data: semesterSubjects = [] } = useSubjects(semester?._id);
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get("tab") || "attendance";
 
@@ -70,7 +72,7 @@ const HomePage = () => {
             {activeTab === "assignments" && (
                 <AssignmentsTab
                     semesterId={semester?._id}
-                    subjects={todaySubjects} // or pass all semester subjects if available
+                    subjects={semesterSubjects} // or pass all semester subjects if available
                 />
             )}
         </div>

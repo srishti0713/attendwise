@@ -8,7 +8,10 @@ import {
     CheckCircle,
     Check,
 } from "lucide-react";
-import useAssignments from "../../hooks/useAssignments";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useSubjectAssignments from "../../hooks/useSubjectAssignments";
+import useCompletedAssignments from "../../hooks/useCompletedAssignments";
+import { editAssignment, deleteAssignment } from "../../api/assignment.api";
 import moment from "moment";
 
 const getDueBadge = (dueDate) => {
@@ -40,7 +43,9 @@ const AssignmentRow = ({ assignment, onComplete, onDelete }) => {
 
     return (
         <div
-            className={`flex items-start gap-3 px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-opacity group ${done ? "opacity-0" : "opacity-100"} transition-all duration-300`}
+            className={`flex items-start gap-3 px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 group ${
+                done ? "opacity-0" : "opacity-100"
+            } transition-all duration-300`}
         >
             {/* Check button */}
             <button
@@ -54,7 +59,9 @@ const AssignmentRow = ({ assignment, onComplete, onDelete }) => {
             {/* Content */}
             <div className="flex-1 min-w-0">
                 <p
-                    className={`text-sm font-medium leading-snug ${done ? "line-through text-gray-400" : "text-[#1A1A2E]"}`}
+                    className={`text-sm font-medium leading-snug ${
+                        done ? "line-through text-gray-400" : "text-[#1A1A2E]"
+                    }`}
                 >
                     {assignment.title}
                 </p>
@@ -84,21 +91,60 @@ const AssignmentRow = ({ assignment, onComplete, onDelete }) => {
     );
 };
 
-const SubjectBlock = ({
-    group,
-    onComplete,
-    onDelete,
-    fetchCompleted,
-    getCompleted,
-}) => {
+const SubjectBlock = ({ subject }) => {
+    const queryClient = useQueryClient();
     const [open, setOpen] = useState(true);
     const [showCompleted, setShowCompleted] = useState(false);
-    const completed = getCompleted(group.subjectId) ?? [];
+
+    // Fetch pending assignments for this subject
+    const { data: assignments = [], isLoading } = useSubjectAssignments(
+        subject._id,
+    );
+
+    // Fetch completed assignments for this subject — only when expanded
+    const { data: completed = [], refetch: fetchCompleted } =
+        useCompletedAssignments(subject._id);
 
     const handleShowCompleted = () => {
-        if (!showCompleted) fetchCompleted(group.subjectId);
+        if (!showCompleted) fetchCompleted();
         setShowCompleted((v) => !v);
     };
+
+    // Mark assignment as complete
+    const { mutate: markComplete } = useMutation({
+        mutationFn: (assignment) =>
+            editAssignment({
+                assignmentId: assignment._id,
+                status: "completed",
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries([
+                "assignments",
+                "subject",
+                subject._id,
+            ]);
+            queryClient.invalidateQueries([
+                "assignments",
+                "subject",
+                subject._id,
+                "completed",
+            ]);
+        },
+    });
+
+    // Delete assignment
+    const { mutate: removeAssignment } = useMutation({
+        mutationFn: (assignmentId) => deleteAssignment(assignmentId),
+        onSuccess: () => {
+            queryClient.invalidateQueries([
+                "assignments",
+                "subject",
+                subject._id,
+            ]);
+        },
+    });
+
+    if (isLoading) return null;
 
     return (
         <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
@@ -109,32 +155,34 @@ const SubjectBlock = ({
             >
                 <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold tracking-widest uppercase text-gray-400">
-                        {group.subjectName}
+                        {subject.subjectName}
                     </span>
                     <span className="text-xs font-semibold bg-[#E2DBF0] text-[#534AB7] px-2.5 py-0.5 rounded-full">
-                        {group.assignments.length}
+                        {assignments.length}
                     </span>
                 </div>
                 <ChevronDown
                     size={16}
-                    className={`text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                    className={`text-gray-400 transition-transform duration-200 ${
+                        open ? "rotate-180" : ""
+                    }`}
                 />
             </button>
 
             {/* Assignments */}
             {open && (
                 <div className="border-t border-gray-100">
-                    {group.assignments.length === 0 ? (
+                    {assignments.length === 0 ? (
                         <p className="text-xs text-gray-400 text-center py-6">
                             No pending assignments
                         </p>
                     ) : (
-                        group.assignments.map((a) => (
+                        assignments.map((a) => (
                             <AssignmentRow
                                 key={a._id}
                                 assignment={a}
-                                onComplete={onComplete}
-                                onDelete={onDelete}
+                                onComplete={markComplete}
+                                onDelete={removeAssignment}
                             />
                         ))
                     )}
@@ -176,46 +224,19 @@ const SubjectBlock = ({
     );
 };
 
-const AssignmentsTab = ({ semesterId, subjects }) => {
-    const {
-        groupedPending,
-        isLoading,
-        error,
-        markComplete,
-        deleteAssignment,
-        fetchCompletedForSubject,
-        getCompletedForSubject,
-    } = useAssignments(semesterId, subjects);
-
-    if (isLoading)
+const AssignmentsTab = ({ subjects }) => {
+    if (!subjects?.length)
         return (
-            <p className="text-center text-[#8070AA] font-medium mt-10 text-sm">
-                Loading assignments...
+            <p className="text-sm text-[#8070AA] font-semibold text-center mt-10">
+                No subjects found.
             </p>
-        );
-    if (error)
-        return (
-            <p className="text-center text-red-400 text-sm mt-10">{error}</p>
         );
 
     return (
         <div className="flex flex-col gap-3 w-full">
-            {groupedPending.length === 0 ? (
-                <p className="text-sm text-[#8070AA] font-semibold text-center mt-10">
-                    All caught up! 🎉
-                </p>
-            ) : (
-                groupedPending.map((group) => (
-                    <SubjectBlock
-                        key={group.subjectId}
-                        group={group}
-                        onComplete={markComplete}
-                        onDelete={deleteAssignment}
-                        fetchCompleted={fetchCompletedForSubject}
-                        getCompleted={getCompletedForSubject}
-                    />
-                ))
-            )}
+            {subjects.map((subject) => (
+                <SubjectBlock key={subject._id} subject={subject} />
+            ))}
 
             <button
                 onClick={() => {
