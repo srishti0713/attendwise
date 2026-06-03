@@ -52,19 +52,35 @@ const HomePage = () => {
                             No classes today!
                         </p>
                     ) : (
-                        todaySubjects.map((subject) => (
-                            <Card
-                                key={subject._id}
-                                subjectId={subject._id}
-                                subject={subject.subjectName}
-                                percentage={subject.attendancePercentage}
-                                status={subject.status}
-                                classesToSafe={subject.classesToSafeZone}
-                                classesToGoal={subject.classesToGoal}
-                                canMiss={subject.canMiss}
-                                semesterId={semester?._id}
-                            />
-                        ))
+                        todaySubjects.map((subject) => {
+                            const todayStr = new Date()
+                                .toISOString()
+                                .slice(0, 10);
+                            const todayEntry = subject.attendance?.find(
+                                (entry) =>
+                                    new Date(entry.date)
+                                        .toISOString()
+                                        .slice(0, 10) === todayStr,
+                            );
+
+                            return (
+                                <Card
+                                    key={subject._id}
+                                    subjectId={subject._id}
+                                    subject={subject.subjectName}
+                                    percentage={subject.attendancePercentage}
+                                    status={subject.status}
+                                    classesToSafe={subject.classesToSafeZone}
+                                    classesToGoal={subject.classesToGoal}
+                                    canMiss={subject.canMiss}
+                                    semesterId={semester?._id}
+                                    todayAttendanceId={todayEntry?._id ?? null}
+                                    todayAttendanceStatus={
+                                        todayEntry?.status ?? null
+                                    }
+                                />
+                            );
+                        })
                     )}
                 </div>
             )}

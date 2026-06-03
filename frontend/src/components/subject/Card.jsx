@@ -1,8 +1,11 @@
 import Button from "../buttons/Button.jsx";
+import { useState } from "react";
+import {useNavigate} from "react-router-dom";
 import { Check, X, Ban } from "lucide-react";
 import AttendanceCircle from "./AttendanceCircle.jsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateSubject } from "../../api/subject.api.js";
+import { toLocalISOString } from "../../utils/date.js";
 
 const CARD_STYLES = {
     safe: {
@@ -37,17 +40,22 @@ const Card = ({
     canMiss,
     semesterId,
     subjectId,
+    todayAttendanceId,
+    todayAttendanceStatus,
 }) => {
     const styles = CARD_STYLES[status] ?? CARD_STYLES.danger;
+    
+    const navigate = useNavigate();
 
     const queryClient = useQueryClient();
 
     const { mutate, isPending } = useMutation({
-        mutationFn: (attendanceStatus) =>
-            updateSubject(subjectId, {
-                date: new Date().toISOString(),
-                status: attendanceStatus,
-            }),
+        mutationFn: (attendanceStatus) => {
+            const payload = todayAttendanceId
+                ? { attendanceId: todayAttendanceId, status: attendanceStatus }
+                : { date: toLocalISOString(), status: attendanceStatus };
+            return updateSubject(subjectId, payload);
+        },
         onSuccess: () => {
             queryClient.refetchQueries({
                 queryKey: ["timetable", semesterId],
@@ -73,6 +81,10 @@ const Card = ({
     };
 
     const infoMessage = getInfoMessage();
+    const [selectedStatus, setSelectedStatus] = useState(todayAttendanceStatus);
+
+    const dim = (key) =>
+        selectedStatus && selectedStatus !== key ? "opacity-30" : "";
 
     return (
         <div
@@ -94,6 +106,7 @@ const Card = ({
             {/* Bottom Row */}
             <div className="flex items-center gap-2 w-full">
                 <Button
+                    onClick={() => navigate(`/subjects/${subjectId}/assignments/add`)}
                     className={`btn-sm font-semibold rounded-xl shrink-0 ${styles.button}`}
                     variant=""
                 >
@@ -101,25 +114,34 @@ const Card = ({
                 </Button>
                 <div className="flex gap-2 ml-auto shrink-0">
                     <Button
-                        className={`btn-sm border-[#6639ed] shadow-sm rounded-xl w-9 h-9 ${styles.ban}`}
+                        className={`btn-sm border-[#6639ed] shadow-sm rounded-xl w-9 h-9 transition-opacity ${styles.ban} ${dim("off")}`}
                         variant=""
-                        onClick={() => mutate("off")}
+                        onClick={() => {
+                            mutate("off");
+                            setSelectedStatus("off");
+                        }}
                         disabled={isPending}
                     >
                         <Ban size={16} />
                     </Button>
                     <Button
-                        className={`btn-sm border-[#45685a] shadow-sm rounded-xl w-9 h-9 ${styles.check}`}
+                        className={`btn-sm border-[#45685a] shadow-sm rounded-xl w-9 h-9 transition-opacity ${styles.check} ${dim("attended")}`}
                         variant=""
-                        onClick={() => mutate("attended")}
+                        onClick={() => {
+                            mutate("attended");
+                            setSelectedStatus("attended");
+                        }}
                         disabled={isPending}
                     >
                         <Check size={16} />
                     </Button>
                     <Button
-                        className={`btn-sm border-[#893e53] shadow-sm rounded-xl w-9 h-9 ${styles.x}`}
+                        className={`btn-sm border-[#893e53] shadow-sm rounded-xl w-9 h-9 transition-opacity ${styles.x} ${dim("missed")}`}
                         variant=""
-                        onClick={() => mutate("missed")}
+                        onClick={() => {
+                            mutate("missed");
+                            setSelectedStatus("missed");
+                        }}
                         disabled={isPending}
                     >
                         <X size={16} />

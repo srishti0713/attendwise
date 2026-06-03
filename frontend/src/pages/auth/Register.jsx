@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { register } from "../../api/auth.api";
+import { Eye, EyeOff } from "lucide-react";
 
 const Register = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [showPassword, setShowPassword] = useState(false)
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -82,19 +84,29 @@ const Register = () => {
                     }}
                 />
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={form.password}
-                    onChange={(e) =>
-                        setForm({ ...form, password: e.target.value })
-                    }
-                    className="w-full px-4 py-3 rounded-xl text-sm text-[#1A1A2E] outline-none placeholder:text-[#1A1A2E]/40 font-medium"
-                    style={{
-                        background: "rgba(255,255,255,0.35)",
-                        border: "1px solid rgba(255,255,255,0.5)",
-                    }}
-                />
+                <div className="relative w-full">
+                    <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl text-sm text-[#1A1A2E] outline-none placeholder:text-[#1A1A2E]/40 font-medium pr-11"
+                        style={{
+                            background: "rgba(255,255,255,0.35)",
+                            border: "1px solid rgba(255,255,255,0.5)",
+                        }}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#1A1A2E]/50 hover:text-[#1A1A2E]/80"
+                    >
+                        {showPassword ? (
+                            <EyeOff size={16} />
+                        ) : (
+                            <Eye size={16} />
+                        )}
+                    </button>
+                </div>
 
                 {/* Error */}
                 {mutation.isError && (

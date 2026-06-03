@@ -8,7 +8,6 @@ import {
     deleteAssignment,
 } from "../controllers/assignment.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
-import { upload } from "../middleware/multer.middleware.js";
 import express from "express";
 
 const router = express.Router();
@@ -16,7 +15,6 @@ const router = express.Router();
 // POST
 router.post(
     "/create-assignment/:subjectId",
-    upload.single(),
     verifyJWT,
     addAssignment,
 );

@@ -1,17 +1,10 @@
 import { api } from "./axios";
 
-export const addAssignment = async ({
-    subjectId,
-    title,
-    description,
-    dueDate,
-}) => {
+export const addAssignment = async ({ subjectId, title, description, dueDate }) => {
     const { data } = await api.post(
         `/assignments/create-assignment/${subjectId}`,
-        payload,
-        {
-            headers: { "Content-Type": "application/json" },
-        },
+        { title, description, dueDate },
+        { headers: { "Content-Type": "application/json" } },
     );
     return data;
 };
@@ -48,9 +41,7 @@ export const editAssignment = async ({ assignmentId, ...fields }) => {
     const { data } = await api.patch(
         `/assignments/edit-assignment/${assignmentId}`,
         fields,
-        {
-            headers: { "Content-Type": "application/json" },
-        },
+        { headers: { "Content-Type": "application/json" } },
     );
     return data;
 };

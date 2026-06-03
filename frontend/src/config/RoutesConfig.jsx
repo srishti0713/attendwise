@@ -10,6 +10,8 @@ import AddSemesterPage from "../pages/semester/AddSemesterPage";
 import EditSemesterPage from "../pages/semester/EditSemesterPage";
 import AddTimetablePage from "../pages/timetable/AddTimetablePage";
 import SubjectAttendanceDetail from "../pages/subjects/SubjectAttendanceDetail";
+import AddAssignmentPage from "../pages/assignment/AddAssignmentPage";
+import EditAssignmentPage from "../pages/assignment/EditAssignmentPage";
 
 export const routes = [
     {
@@ -81,6 +83,18 @@ export const routes = [
     {
         path: "/subjects/:subjectId/attendance",
         element: <SubjectAttendanceDetail />,
+        protected: true,
+        publicOnly: false,
+    },
+    {
+        path: "/subjects/:subjectId/assignments/add",
+        element: <AddAssignmentPage />,
+        protected: true,
+        publicOnly: false,
+    },
+    {
+        path: "/assignments/:assignmentId/edit",
+        element: <EditAssignmentPage />,
         protected: true,
         publicOnly: false,
     },

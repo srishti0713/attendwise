@@ -8,6 +8,7 @@ import {
     CheckCircle,
     Check,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useSubjectAssignments from "../../hooks/useSubjectAssignments";
 import useCompletedAssignments from "../../hooks/useCompletedAssignments";
@@ -40,6 +41,7 @@ const AssignmentRow = ({ assignment, onComplete, onDelete }) => {
         setDone(true);
         setTimeout(() => onComplete(assignment), 400);
     };
+    const navigate = useNavigate();
 
     return (
         <div
@@ -62,6 +64,9 @@ const AssignmentRow = ({ assignment, onComplete, onDelete }) => {
                     className={`text-sm font-medium leading-snug ${
                         done ? "line-through text-gray-400" : "text-[#1A1A2E]"
                     }`}
+                    onClick={() =>
+                        navigate(`/assignments/${assignment._id}/edit`)
+                    }
                 >
                     {assignment.title}
                 </p>
@@ -95,6 +100,7 @@ const SubjectBlock = ({ subject }) => {
     const queryClient = useQueryClient();
     const [open, setOpen] = useState(true);
     const [showCompleted, setShowCompleted] = useState(false);
+    const navigate = useNavigate();
 
     // Fetch pending assignments for this subject
     const { data: assignments = [], isLoading } = useSubjectAssignments(
@@ -174,7 +180,21 @@ const SubjectBlock = ({ subject }) => {
                 <div className="border-t border-gray-100">
                     {assignments.length === 0 ? (
                         <p className="text-xs text-gray-400 text-center py-6">
-                            No pending assignments
+                            <button className="w-full bg-white p-4 flex flex-col items-center gap-2 text-[#8070AA]">
+                                <span
+                                    className="text-xs font-bold"
+                                    onClick={() =>
+                                        navigate(
+                                            `/subjects/${subject._id}/assignments/add`,
+                                        )
+                                    }
+                                >
+                                    Add an assignment
+                                </span>
+                                <span className="text-[11px] font-medium text-[#B0A0CC]">
+                                    Tap to get started
+                                </span>
+                            </button>
                         </p>
                     ) : (
                         assignments.map((a) => (
@@ -237,16 +257,6 @@ const AssignmentsTab = ({ subjects }) => {
             {subjects.map((subject) => (
                 <SubjectBlock key={subject._id} subject={subject} />
             ))}
-
-            <button
-                onClick={() => {
-                    /* open add assignment modal */
-                }}
-                className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-[#AFA9EC] rounded-2xl text-[#7F77DD] text-sm font-medium hover:bg-[#EEEDFE] transition-colors mt-1"
-            >
-                <Plus size={15} />
-                Add assignment
-            </button>
         </div>
     );
 };
