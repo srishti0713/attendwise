@@ -88,7 +88,8 @@ const Register = () => {
                     <input
                         type={showPassword ? "text" : "password"}
                         placeholder="Password"
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={form.password}
+                        onChange={(e) => setForm({ ...form, password: e.target.value })}
                         className="w-full px-4 py-3 rounded-xl text-sm text-[#1A1A2E] outline-none placeholder:text-[#1A1A2E]/40 font-medium pr-11"
                         style={{
                             background: "rgba(255,255,255,0.35)",
