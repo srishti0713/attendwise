@@ -5,6 +5,7 @@ const timetableSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Semester",
         required: true,
+        unique: true,
     },
     timetable: {
         Monday: [

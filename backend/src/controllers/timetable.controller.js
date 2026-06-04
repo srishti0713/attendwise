@@ -27,6 +27,13 @@ export const postTimetable = async (req, res) => {
             return res.status(404).json({ message: "Semester not found" });
         }
 
+        //Check if timetable already exists for semester
+        const existing = await Timetable.findOne({ semesterId });
+
+        if (existing) {
+            return res.status(400).json({ message: "Timetable already exists for this semester" });
+        }
+
         // Normalize timetable (handles OCR / partial input)
         const days = [
             "Monday",
