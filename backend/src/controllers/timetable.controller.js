@@ -29,8 +29,9 @@ export const postTimetable = async (req, res) => {
 
         //Check if timetable already exists for semester
         const existing = await Timetable.findOne({ semesterId });
-
+ 
         if (existing) {
+            console.log(existing);
             return res.status(400).json({ message: "Timetable already exists for this semester" });
         }
 

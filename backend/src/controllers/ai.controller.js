@@ -15,11 +15,7 @@ export const extractTimetable = async (req, res) => {
             req.file.mimetype,
         );
 
-        // --- TEST ---
-        console.log(parsed);
-        console.log(" ");
-        console.log(raw);
-        // --- TEST ---
+        
 
         const timetable = {};
 
@@ -39,24 +35,9 @@ export const extractTimetable = async (req, res) => {
             timetable[day] = subjects.map((code) => map[code]).filter(Boolean);
         }
 
-        const newTimetable = await Timetable.create({
-            semesterId: req.body.semesterId,
-            timetable,
-        });
-
         fs.unlinkSync(req.file.path);
 
-        // --- TEST (REMOVE LATER) ---
-        console.log(`
-            NEW TIMETABLE:
-            ${newTimetable}
-            AI RAW:
-            ${parsed}
-            `);
-        // --- TEST (REMOVE LATER) ---
-
         return res.status(200).json({
-            data: newTimetable,
             aiRaw: parsed,
         });
     } catch (error) {
