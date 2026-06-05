@@ -14,7 +14,7 @@ const Footer = () => {
     ];
 
     return (
-        <div className="bg-linear-to-br from-[#EDE8F5] via-[#F2EEE8] to-[#E8F0F5] border-t border-[#E2DBF0] flex justify-around items-center px-6 py-3">
+        <div className="fixed bottom-0 left-0 right-0 bg-linear-to-br from-[#EDE8F5] via-[#F2EEE8] to-[#E8F0F5] border-t border-[#E2DBF0] flex justify-around items-center px-6 py-3" >
             {tabs.map(({ icon, route }) => {
                 const isActive = path === route;
                 return (

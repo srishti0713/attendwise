@@ -53,15 +53,11 @@ const HomePage = () => {
                         </p>
                     ) : (
                         todaySubjects.map((subject) => {
-                            const todayStr = new Date()
-                                .toISOString()
-                                .slice(0, 10);
-                            const todayEntry = subject.attendance?.find(
-                                (entry) =>
-                                    new Date(entry.date)
-                                        .toISOString()
-                                        .slice(0, 10) === todayStr,
-                            );
+                            const todayStr = new Date().toLocaleDateString("en-CA");
+                            const todayEntry = subject.attendance?.find((entry) => {
+    const entryDate = new Date(entry.date).toLocaleDateString("en-CA");
+    return entryDate === todayStr;
+                        });
 
                             return (
                                 <Card

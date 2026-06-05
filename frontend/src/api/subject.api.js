@@ -18,10 +18,10 @@ export const getSubject = async (subjectId) => {
 };
 
 export const updateSubject = async (subjectId, payload) => {
-    const { data } = await api.patch(`/subjects/${subjectId}`, payload, {
-        headers: { "Content-Type": "application/json" },
-    });
-    return data;
+        const { data } = await api.patch(`/subjects/${subjectId}`, payload, {
+            headers: { "Content-Type": "application/json" },
+        });
+        return data;
 };
 
 export const deleteSubject = async (subjectId) => {

@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import Timetable from "../models/timetable.model.js";
+import Semester from "../models/semester.model.js";
 import { sendAttendanceWarningEmail } from "./mailer.service.js";
 import { getAttendanceStats } from "../utils/attendance.util.js";
 
@@ -15,7 +16,9 @@ export const startAttendanceWarningCron = () => {
             });
 
             try {
-                const timetables = await Timetable.find().populate({
+                const currentSemesterIds = await Semester.find({ isCurrent: true }).distinct("_id");
+                
+                const timetables = await Timetable.find({ semesterId: { $in: currentSemesterIds } }).populate({
                     path: `timetable.${todayName}`,
                     populate: {
                         path: "userId",
@@ -23,10 +26,6 @@ export const startAttendanceWarningCron = () => {
                     },
                 });
 
-                if (!timetables.length) {
-                    console.log("No timetables found.");
-                    return;
-                }
 
                 const studentMap = {};
 
@@ -39,8 +38,8 @@ export const startAttendanceWarningCron = () => {
                         const user = subject.userId;
                         if (!user?.email) continue;
 
-                        const safe = user.attendanceThreshold ?? 75;
-                        const target = safe;
+                        const safe = user.safePercentage ?? 75;
+                        const target = user.targetPercentage ?? 75;
 
                         // Use your actual util with the subject's attendance logs
                         const stats = getAttendanceStats(
