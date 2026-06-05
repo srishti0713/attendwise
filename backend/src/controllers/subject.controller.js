@@ -85,8 +85,6 @@ export const getSubject = async (req, res) => {
 
 export const addSubject = async (req, res) => {
     try {
-        console.log("body:", req.body);
-        console.log("params:", req.params);
         const { semesterId } = req.params;
         let { subjectName, totalClasses, attendedClasses } = req.body;
 
